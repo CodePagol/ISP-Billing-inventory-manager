@@ -46,11 +46,15 @@ class Plugin extends AbstractPlugin
     {
         parent::boot($app);
 
-        // Register Livewire components
+        // Register Livewire components (using standard hyphen and dot notation without colons)
         if (class_exists(Livewire::class)) {
-            Livewire::component('inventory::dashboard', InventoryDashboard::class);
-            Livewire::component('inventory::item-manager', ItemManager::class);
-            Livewire::component('inventory::movement-manager', StockMovementManager::class);
+            Livewire::component('inventory-dashboard', InventoryDashboard::class);
+            Livewire::component('inventory-items', ItemManager::class);
+            Livewire::component('inventory-movements', StockMovementManager::class);
+
+            Livewire::component('inventory.dashboard', InventoryDashboard::class);
+            Livewire::component('inventory.items', ItemManager::class);
+            Livewire::component('inventory.movements', StockMovementManager::class);
         }
     }
 
