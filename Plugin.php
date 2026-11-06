@@ -80,17 +80,17 @@ class Plugin extends AbstractPlugin
 
     protected function registerHooks(): void
     {
-        // 1. Add Navigation to Admin Sidebar
+        // 1. Add Navigation to Admin Sidebar under Expense Management / Finance
         Hooks::filter('sidebar.nav.items', function (array $items) {
             $items[] = [
                 'id'       => 'inventory-management',
+                'parent'   => 'expenses',
                 'title'    => 'Inventory & Stock',
                 'icon'     => 'bi bi-boxes',
-                'section'  => 'Accounts & Billing',
                 'route'    => 'admin.inventory.dashboard',
                 'children' => [
                     [
-                        'title' => 'Dashboard',
+                        'title' => 'Inventory Dashboard',
                         'route' => 'admin.inventory.dashboard',
                         'icon'  => 'bi bi-speedometer2',
                     ],
