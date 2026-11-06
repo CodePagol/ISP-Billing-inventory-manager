@@ -1,0 +1,19 @@
+{
+    "id": "inventory-manager",
+    "name": "Inventory & Asset Manager",
+    "version": "1.0.0",
+    "description": "Comprehensive ISP inventory and hardware tracking: routers, ONUs, cables, customer deployments, damage status, and expense integration.",
+    "author": "Code Pagol Ltd",
+    "author_url": "https://codepagol.com",
+    "requires_core": "1.0.0",
+    "requires_license": false,
+    "class": "Plugins\\InventoryManager\\Plugin",
+    "tags": [
+        "inventory",
+        "assets",
+        "expenses",
+        "hardware",
+        "stock"
+    ],
+    "support_url": "https://codepagol.com/support"
+}
