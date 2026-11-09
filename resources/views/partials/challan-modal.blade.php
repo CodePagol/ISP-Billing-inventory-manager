@@ -161,61 +161,70 @@
     window.doPrintChallan = function() {
         const printElement = document.getElementById('challan-print-area');
         if (!printElement) {
-            console.error('#challan-print-area not found');
+            console.error('Print area #challan-print-area not found');
             return;
         }
 
-        const iframe = document.createElement('iframe');
-        iframe.style.position = 'fixed';
-        iframe.style.right = '0';
-        iframe.style.bottom = '0';
-        iframe.style.width = '0px';
-        iframe.style.height = '0px';
-        iframe.style.border = 'none';
-        iframe.style.visibility = 'hidden';
-        document.body.appendChild(iframe);
-
-        let cssLinks = Array.from(document.querySelectorAll('link[rel=stylesheet]'))
-            .map(link => `<link rel="stylesheet" href="${link.href}">`)
-            .join('');
-
-        const doc = iframe.contentWindow.document;
-        doc.open();
-        doc.write('<!DOCTYPE html><html><head><title>Challan Gate Pass</title>');
-        doc.write(cssLinks);
-        doc.write('<style>body { background-color: white !important; margin: 20px; font-family: sans-serif; } * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } @media print { @page { size: auto; margin: 15mm; } }</style>');
-        doc.write('</head><body>');
-        doc.write(printElement.outerHTML);
-        doc.write('</body></html>');
-        doc.close();
-
-        setTimeout(() => {
-            try {
-                iframe.contentWindow.focus();
-                iframe.contentWindow.print();
-            } catch (err) {
-                console.error('Print error:', err);
-                window.print();
+        // 1. Primary: Use print-js library if available (as imported in app.js as window.print)
+        try {
+            if (typeof window.print === 'function') {
+                window.print({
+                    printable: 'challan-print-area',
+                    type: 'html',
+                    scanStyles: true,
+                    targetStyles: ['*']
+                });
+                return;
             }
+        } catch (e) {
+            console.warn('printJS failed, falling back to iframe print:', e);
+        }
+
+        // 2. Fallback: Hidden iframe printing (escaped closing tags prevent PHP-Flasher injection)
+        try {
+            const iframe = document.createElement('iframe');
+            iframe.style.position = 'fixed';
+            iframe.style.right = '0';
+            iframe.style.bottom = '0';
+            iframe.style.width = '0px';
+            iframe.style.height = '0px';
+            iframe.style.border = 'none';
+            iframe.style.visibility = 'hidden';
+            document.body.appendChild(iframe);
+
+            let cssLinks = Array.from(document.querySelectorAll('link[rel=stylesheet]'))
+                .map(link => '<link rel="stylesheet" href="' + link.href + '">')
+                .join('');
+
+            const doc = iframe.contentWindow.document;
+            doc.open();
+            doc.write('<!DOCTYPE html><html><' + 'head><title>Challan Gate Pass<' + '/title>');
+            doc.write(cssLinks);
+            doc.write('<style>body { background-color: #fff !important; margin: 20px; font-family: sans-serif; } * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } @media print { @page { size: auto; margin: 10mm; } }<' + '/style>');
+            doc.write('<' + '/head><' + 'body>');
+            doc.write(printElement.outerHTML);
+            doc.write('<' + '/body><' + '/html>');
+            doc.close();
+
             setTimeout(() => {
-                if (iframe.parentNode) {
-                    document.body.removeChild(iframe);
+                try {
+                    iframe.contentWindow.focus();
+                    iframe.contentWindow.print();
+                } catch (err) {
+                    console.error('Iframe print failed:', err);
+                    if (typeof Window.prototype.print === 'function') {
+                        Window.prototype.print.call(window);
+                    }
                 }
-            }, 2000);
-        }, 500);
+                setTimeout(() => {
+                    if (iframe.parentNode) {
+                        document.body.removeChild(iframe);
+                    }
+                }, 2000);
+            }, 500);
+        } catch (err2) {
+            console.error('All challan print methods failed:', err2);
+        }
     };
 </script>
-
-@push('scripts')
-<script>
-    if (typeof window.doPrintChallan === 'undefined') {
-        window.doPrintChallan = function() {
-            const printElement = document.getElementById('challan-print-area');
-            if (printElement) {
-                window.print();
-            }
-        };
-    }
-</script>
-@endpush
 
