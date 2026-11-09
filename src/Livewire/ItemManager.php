@@ -52,7 +52,7 @@ class ItemManager extends Component
     public string $purchase_date = '';
     public string $supplier = '';
     public int $warranty_months = 0;
-    public string $warranty_status = 'valid';
+    public string $warranty_status = 'under_warranty';
     public string $current_location_name = 'Main Store';
     public string $notes = '';
 
@@ -70,10 +70,11 @@ class ItemManager extends Component
 
     // Damage Form
     public string $damage_status = 'damaged'; // 'damaged' or 'under_repair'
-    public string $damage_type = 'Burned / Power Surge';
+    public string $damage_type = 'burned_surge';
     public string $damage_reason = '';
     public string $damage_date = '';
-    public bool $replace_with_new = false;
+    public bool $replace_with_new = false;   // internal alias
+    public bool $replace_for_customer = false; // blade uses this name
     public ?int $replacement_item_id = null;
 
     // Return Form
@@ -186,7 +187,7 @@ class ItemManager extends Component
         $this->quantity = 1;
         $this->purchase_price = 0;
         $this->warranty_months = 0;
-        $this->warranty_status = 'valid';
+        $this->warranty_status = 'under_warranty';
         $this->current_location_name = 'Main Store';
         $this->purchase_date = now()->format('Y-m-d');
 
@@ -226,7 +227,7 @@ class ItemManager extends Component
         $this->purchase_date         = $item->purchase_date ? Carbon::parse($item->purchase_date)->format('Y-m-d') : '';
         $this->supplier              = $item->supplier ?? '';
         $this->warranty_months       = (int) $item->warranty_months;
-        $this->warranty_status       = $item->warranty_status ?? 'valid';
+        $this->warranty_status       = $item->warranty_status ?? 'under_warranty';
         $this->current_location_name = $item->current_location_name ?? 'Main Store';
         $this->notes                 = $item->notes ?? '';
 
@@ -303,7 +304,7 @@ class ItemManager extends Component
                         'supplier'              => $this->supplier ?: null,
                         'warranty_months'       => $this->warranty_months,
                         'warranty_expiry'       => $warrantyExpiry,
-                        'warranty_status'       => 'valid',
+                        'warranty_status'       => 'under_warranty',
                         'status'                => 'in_stock',
                         'current_location_type' => 'warehouse',
                         'current_location_name' => $this->current_location_name,
@@ -389,7 +390,7 @@ class ItemManager extends Component
             'supplier'              => $this->supplier ?: null,
             'warranty_months'       => $this->warranty_months,
             'warranty_expiry'       => $warrantyExpiry,
-            'warranty_status'       => $this->warranty_status ?: 'valid',
+            'warranty_status'       => $this->warranty_status ?: 'under_warranty',
             'current_location_name' => $this->current_location_name,
             'notes'                 => $this->notes ?: null,
             'created_by'            => auth()->id(),
@@ -532,12 +533,15 @@ class ItemManager extends Component
     {
         $this->actionItemId = $itemId;
         $this->damage_status = 'damaged';
-        $this->damage_type = 'Burned / Power Surge';
+        $this->damage_type = 'burned_surge';
         $this->damage_reason = '';
         $this->damage_date = now()->format('Y-m-d');
-        $this->warranty_status = 'valid';
+        $this->warranty_status = 'under_warranty';
         $this->replace_with_new = false;
+        $this->replace_for_customer = false;
         $this->replacement_item_id = null;
+        // Load viewingItem so the blade can check assigned_customer_id for replacement section
+        $this->viewingItem = InventoryItem::with(['category', 'customer'])->find($itemId);
         $this->showDamageModal = true;
     }
 
@@ -548,13 +552,16 @@ class ItemManager extends Component
             'damage_type'         => 'required|string|max:100',
             'damage_reason'       => 'required|string|max:1000',
             'damage_date'         => 'required|date',
-            'warranty_status'     => 'required|in:valid,expired,claimed,replaced,scrapped',
-            'replacement_item_id' => $this->replace_with_new ? 'required|exists:inventory_items,id' : 'nullable',
+            'warranty_status'     => 'required|in:under_warranty,out_of_warranty,sent_for_rma,void',
+            'replacement_item_id' => ($this->replace_for_customer || $this->replace_with_new) ? 'required|exists:inventory_items,id' : 'nullable',
         ]);
 
         $item = InventoryItem::findOrFail($this->actionItemId);
 
-        DB::transaction(function () use ($item) {
+        // Sync replace_for_customer → replace_with_new (blade uses replace_for_customer name)
+        $doReplace = $this->replace_for_customer || $this->replace_with_new;
+
+        DB::transaction(function () use ($item, $doReplace) {
             $prevStatus = $item->status;
             $item->status = $this->damage_status;
             $item->damage_type = $this->damage_type;
@@ -582,7 +589,7 @@ class ItemManager extends Component
             ]);
 
             // If replacement was selected:
-            if ($this->replace_with_new && $this->replacement_item_id) {
+            if (($this->replace_for_customer || $this->replace_with_new) && $this->replacement_item_id) {
                 $replacement = InventoryItem::findOrFail($this->replacement_item_id);
                 $replacement->status = 'deployed';
                 $replacement->current_location_type = $item->current_location_type;
@@ -769,4 +776,5 @@ class ItemManager extends Component
         ])->layout('layouts.app');
     }
 }
+
 
