@@ -35,13 +35,14 @@
                 @endphp
 
                 {{-- Printable Paper Container --}}
-                <div id="challan-print-area" style="background: #ffffff; color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans Bengali', 'Hind Siliguri', 'Kalpurush', 'SolaimanLipi', sans-serif; font-size: 11px; line-height: 1.35; padding: 18px 24px; border: 1px solid #cbd5e1; border-radius: 8px; max-width: 820px; margin: 0 auto; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+                <div id="challan-print-area" style="background: #ffffff; color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans Bengali', 'Hind Siliguri', 'Kalpurush', 'SolaimanLipi', sans-serif; font-size: 11px; line-height: 1.35; padding: 16px 22px; border: 1px solid #cbd5e1; border-radius: 8px; max-width: 820px; margin: 0 auto; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
 
                     @foreach($copies as $index => $copy)
-                        <div class="challan-copy" style="page-break-inside: avoid;">
+                        {{-- Each copy is a flex column so its footer can grow to fill space --}}
+                        <div class="challan-copy" style="display: flex; flex-direction: column; page-break-inside: avoid;">
 
                             {{-- 1. HEADER --}}
-                            <table style="width: 100%; border-collapse: collapse; margin-bottom: 6px; border-bottom: 1.5px solid {{ $copy['accent'] }}; padding-bottom: 4px;">
+                            <table style="width: 100%; border-collapse: collapse; margin-bottom: 5px; border-bottom: 1.5px solid {{ $copy['accent'] }}; padding-bottom: 4px;">
                                 <tr>
                                     <td style="width: 60%; vertical-align: top; padding-right: 10px;">
                                         <div style="font-size: 16px; font-weight: 800; text-transform: uppercase; color: #0f172a; letter-spacing: 0.5px; line-height: 1.2;">
@@ -78,18 +79,17 @@
                             </table>
 
                             {{-- 2. PARTIES DETAILS --}}
-                            <table style="width: 100%; border-collapse: collapse; margin-bottom: 6px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 10.5px;">
+                            <table style="width: 100%; border-collapse: collapse; margin-bottom: 5px; background: #f8fafc; border: 1px solid #cbd5e1; font-size: 10.5px;">
                                 <tr>
                                     <td style="width: 50%; vertical-align: top; padding: 6px 10px; border-right: 1px dashed #cbd5e1;">
                                         <div style="font-size: 9.5px; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 0.5px; margin-bottom: 3px; border-bottom: 1px solid #e2e8f0; padding-bottom: 2px;">
                                             {{ __('RECIPIENT / CUSTOMER') }}
                                         </div>
                                         @if($printAssignment->customer)
-                                            <div style="font-size: 13px; font-weight: 800; color: #0f172a;">
-                                                {{ $printAssignment->customer->customer_name }}
-                                            </div>
+                                            <div style="font-size: 13px; font-weight: 800; color: #0f172a;">{{ $printAssignment->customer->customer_name }}</div>
                                             <div style="color: #334155; margin-top: 1px;">
-                                                <strong>{{ __('ID') }}:</strong> <span style="font-family: monospace; font-weight: 800; color: #2563eb;">{{ $printAssignment->customer->customer_unique_id }}</span>
+                                                <strong>{{ __('ID') }}:</strong>
+                                                <span style="font-family: monospace; font-weight: 800; color: #2563eb;">{{ $printAssignment->customer->customer_unique_id }}</span>
                                                 @if($printAssignment->customer->pppUser)
                                                     <span style="color: #64748b; margin-left: 4px;">({{ $printAssignment->customer->pppUser->username }})</span>
                                                 @endif
@@ -101,9 +101,7 @@
                                                 <strong>{{ __('Address') }}:</strong> {{ Str::limit($printAssignment->customer->address ?: $printAssignment->destination_title, 45) }}
                                             </div>
                                         @else
-                                            <div style="font-size: 13px; font-weight: 700; color: #0f172a;">
-                                                {{ $printAssignment->destination_title }}
-                                            </div>
+                                            <div style="font-size: 13px; font-weight: 700; color: #0f172a;">{{ $printAssignment->destination_title }}</div>
                                             <div style="color: #64748b;">{{ __('Internal ISP Infrastructure / Direct Handover') }}</div>
                                         @endif
                                     </td>
@@ -112,7 +110,8 @@
                                             {{ __('DELIVERY & TECHNICIAN') }}
                                         </div>
                                         <div style="color: #334155;">
-                                            <strong>{{ __('Technician') }}:</strong> <span style="font-weight: 800; color: #0f172a;">{{ $printAssignment->technician?->name ?? __('Direct Handover') }}</span>
+                                            <strong>{{ __('Technician') }}:</strong>
+                                            <span style="font-weight: 800; color: #0f172a;">{{ $printAssignment->technician?->name ?? __('Direct Handover') }}</span>
                                             @if($printAssignment->technician?->mobile)
                                                 <span style="color: #64748b; margin-left: 4px;">({{ $printAssignment->technician->mobile }})</span>
                                             @endif
@@ -131,7 +130,7 @@
                             </table>
 
                             {{-- 3. EQUIPMENT TABLE --}}
-                            <table style="width: 100%; border-collapse: collapse; margin-bottom: 6px; border: 1.5px solid #0f172a; font-size: 10.5px;">
+                            <table style="width: 100%; border-collapse: collapse; margin-bottom: 5px; border: 1.5px solid #0f172a; font-size: 10.5px;">
                                 <thead>
                                     <tr style="background-color: #f1f5f9; color: #0f172a; border-bottom: 1.5px solid #0f172a;">
                                         <th style="border: 1px solid #cbd5e1; padding: 4px 6px; text-align: center; width: 30px; font-weight: 800; font-size: 10px;">#</th>
@@ -146,13 +145,9 @@
                                     <tr>
                                         <td style="border: 1px solid #cbd5e1; padding: 6px; text-align: center; font-weight: 800;">1</td>
                                         <td style="border: 1px solid #cbd5e1; padding: 6px 8px;">
-                                            <div style="font-weight: 800; color: #0f172a; font-size: 11.5px;">
-                                                {{ $printAssignment->item?->title }}
-                                            </div>
+                                            <div style="font-weight: 800; color: #0f172a; font-size: 11.5px;">{{ $printAssignment->item?->title }}</div>
                                             @if($printAssignment->item?->brand || $printAssignment->item?->model_no)
-                                                <div style="color: #64748b; font-size: 9.5px;">
-                                                    {{ $printAssignment->item->brand }} {{ $printAssignment->item->model_no }}
-                                                </div>
+                                                <div style="color: #64748b; font-size: 9.5px;">{{ $printAssignment->item->brand }} {{ $printAssignment->item->model_no }}</div>
                                             @endif
                                         </td>
                                         <td style="border: 1px solid #cbd5e1; padding: 6px 8px; color: #334155; font-size: 10.5px; font-weight: 600;">
@@ -173,55 +168,47 @@
                             </table>
 
                             {{-- 4. NOTICE & TERMS --}}
-                            <div style="background: #f8fafc; border-left: 3px solid {{ $copy['accent'] }}; border-top: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; border-radius: 3px; padding: 4px 8px; margin-bottom: 8px; font-size: 9.5px; color: #475569; line-height: 1.35;">
+                            <div style="background: #f8fafc; border-left: 3px solid {{ $copy['accent'] }}; border-top: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; border-radius: 3px; padding: 4px 8px; margin-bottom: 6px; font-size: 9.5px; color: #475569; line-height: 1.35;">
                                 <strong>{{ __('Declaration:') }}</strong> {{ __('The above equipment is delivered in good working condition. The receiver undertakes safe custody. In case of service disconnection, all equipment must be returned to provider.') }}
                             </div>
 
-                            {{-- 5. SIGNATURES (Spacious 35px height for signature & seal) --}}
-                            <table style="width: 100%; border-collapse: collapse; margin-top: 6px; margin-bottom: 4px; text-align: center;">
-                                <tr>
-                                    <td style="width: 33.33%; padding: 0 15px; vertical-align: bottom;">
-                                        <div style="height: 35px;"></div>
-                                        <div style="border-top: 1.5px solid #0f172a; padding-top: 3px; font-weight: 800; color: #0f172a; font-size: 10.5px;">
-                                            {{ __('Store In-Charge') }}
-                                        </div>
-                                        <div style="font-size: 8.5px; color: #64748b;">{{ __('Seal & Signature') }}</div>
-                                    </td>
-                                    <td style="width: 33.33%; padding: 0 15px; vertical-align: bottom;">
-                                        <div style="height: 35px;"></div>
-                                        <div style="border-top: 1.5px solid #0f172a; padding-top: 3px; font-weight: 800; color: #0f172a; font-size: 10.5px;">
-                                            {{ __('Technician / Staff') }}
-                                        </div>
-                                        <div style="font-size: 8.5px; color: #64748b;">{{ __('Delivered By & Date') }}</div>
-                                    </td>
-                                    <td style="width: 33.33%; padding: 0 15px; vertical-align: bottom;">
-                                        <div style="height: 35px;"></div>
-                                        <div style="border-top: 1.5px solid #0f172a; padding-top: 3px; font-weight: 800; color: #0f172a; font-size: 10.5px;">
-                                            {{ __('Customer / Receiver') }}
-                                        </div>
-                                        <div style="font-size: 8.5px; color: #64748b;">{{ __('Received in Good Condition') }}</div>
-                                    </td>
-                                </tr>
-                            </table>
+                            {{-- 5. SIGNATURES — flex-grow so it expands to fill remaining half-page --}}
+                            <div style="flex: 1; display: flex; flex-direction: column; justify-content: flex-end;">
+                                <table style="width: 100%; border-collapse: collapse; text-align: center; margin-top: 6px; margin-bottom: 2px;">
+                                    <tr>
+                                        <td style="width: 33.33%; padding: 0 15px; vertical-align: bottom;">
+                                            <div style="height: 50px;"></div>
+                                            <div style="border-top: 1.5px solid #0f172a; padding-top: 3px; font-weight: 800; color: #0f172a; font-size: 10.5px;">{{ __('Store In-Charge') }}</div>
+                                            <div style="font-size: 8.5px; color: #64748b;">{{ __('Seal & Signature') }}</div>
+                                        </td>
+                                        <td style="width: 33.33%; padding: 0 15px; vertical-align: bottom;">
+                                            <div style="height: 50px;"></div>
+                                            <div style="border-top: 1.5px solid #0f172a; padding-top: 3px; font-weight: 800; color: #0f172a; font-size: 10.5px;">{{ __('Technician / Staff') }}</div>
+                                            <div style="font-size: 8.5px; color: #64748b;">{{ __('Delivered By & Date') }}</div>
+                                        </td>
+                                        <td style="width: 33.33%; padding: 0 15px; vertical-align: bottom;">
+                                            <div style="height: 50px;"></div>
+                                            <div style="border-top: 1.5px solid #0f172a; padding-top: 3px; font-weight: 800; color: #0f172a; font-size: 10.5px;">{{ __('Customer / Receiver') }}</div>
+                                            <div style="font-size: 8.5px; color: #64748b;">{{ __('Received in Good Condition') }}</div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
 
-                        </div>
+                        </div>{{-- /.challan-copy --}}
 
-                        {{-- Scissor Cutting Divider between Office Copy & Customer Copy --}}
+                        {{-- ✂ Scissor Cutting Divider (original beautiful style) --}}
                         @if($index === 0)
-                            <table class="challan-divider" style="width: 100%; border-collapse: collapse; margin: 10px 0;">
-                                <tr>
-                                    <td style="border-bottom: 1.5px dashed #64748b; width: 33%;"></td>
-                                    <td style="text-align: center; white-space: nowrap; padding: 0 10px; font-size: 9.5px; font-weight: 700; color: #475569; letter-spacing: 0.5px;">
-                                        ✂ &nbsp; {{ __('CUT HERE TO SEPARATE') }} &nbsp; ✂
-                                    </td>
-                                    <td style="border-bottom: 1.5px dashed #64748b; width: 33%;"></td>
-                                </tr>
-                            </table>
+                            <div class="challan-divider" style="margin: 12px 0 14px 0; border-top: 1.5px dashed #64748b; text-align: center; position: relative;">
+                                <span style="background: #ffffff; padding: 2px 14px; color: #334155; font-size: 10px; font-weight: 700; position: relative; top: -9px; border: 1px solid #94a3b8; border-radius: 10px; letter-spacing: 0.5px; display: inline-block;">
+                                    ✂ &nbsp; {{ __('CUT HERE TO SEPARATE') }} &nbsp; ✂
+                                </span>
+                            </div>
                         @endif
                     @endforeach
 
                     {{-- SYSTEM FOOTER --}}
-                    <div style="border-top: 1px dashed #cbd5e1; padding-top: 4px; margin-top: 6px; font-size: 8.5px; color: #94a3b8; display: flex; justify-content: space-between;">
+                    <div style="border-top: 1px dashed #cbd5e1; padding-top: 4px; margin-top: 4px; font-size: 8.5px; color: #94a3b8; display: flex; justify-content: space-between;">
                         <span>{{ __('Printed on:') }} <strong>{{ date('d-M-Y h:i A') }}</strong> &bull; {{ __('Operator:') }} {{ auth()->check() ? auth()->user()->name : __('Admin') }}</span>
                         <span>{{ config('app.name', 'ISP Billing') }} &bull; {{ __('Dual Gate Pass') }}</span>
                     </div>
@@ -265,12 +252,22 @@
         const doc = iframe.contentWindow.document;
         doc.open();
         doc.write('<!DOCTYPE html><html><' + 'head>');
-        doc.write('<title>' + ('{{ __('Delivery Challan') }} - ' + ('{{ $printAssignment?->challan_no }}' || '{{ __('Gate Pass') }}')) + '<' + '/title>');
+        doc.write('<title>{{ __('Delivery Challan') }} - ' + ('{{ $printAssignment?->challan_no }}' || '{{ __('Gate Pass') }}') + '<' + '/title>');
         doc.write('<style>');
-        doc.write('@page { size: A4 portrait; margin: 6mm 10mm 6mm 10mm; }');
-        doc.write('html, body { margin: 0; padding: 0; background: #ffffff !important; color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans Bengali", "Hind Siliguri", "Kalpurush", "SolaimanLipi", sans-serif; font-size: 11px; line-height: 1.35; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }');
-        doc.write('#challan-print-area { border: none !important; box-shadow: none !important; padding: 0 !important; width: 100% !important; max-width: 100% !important; margin: 0 !important; }');
-        doc.write('.challan-copy { page-break-inside: avoid !important; }');
+        // A4 usable height ≈ 277mm = 1047px at 96dpi
+        // We split it: copy1 ≈ 46%, divider ≈ 4%, copy2 ≈ 46%, footer ≈ 4%
+        doc.write('@page { size: A4 portrait; margin: 7mm 10mm 7mm 10mm; }');
+        doc.write('html { height: 100%; margin: 0; padding: 0; }');
+        doc.write('body { height: 100%; margin: 0; padding: 0; background: #ffffff !important; color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans Bengali", "Hind Siliguri", "Kalpurush", "SolaimanLipi", sans-serif; font-size: 11px; line-height: 1.35; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }');
+        doc.write('#challan-print-area { height: 100%; border: none !important; box-shadow: none !important; padding: 0 !important; width: 100% !important; max-width: 100% !important; margin: 0 !important; display: flex; flex-direction: column; }');
+        // Each copy takes equal space, expanding signature area to fill it
+        doc.write('.challan-copy { flex: 1; display: flex; flex-direction: column; page-break-inside: avoid !important; min-height: 0; }');
+        // The signature wrapper (flex:1 div) fills leftover space inside each copy
+        doc.write('.challan-copy > div:last-child { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; }');
+        // Divider stays compact
+        doc.write('.challan-divider { flex: 0 0 auto; }');
+        // Footer stays compact
+        doc.write('#challan-print-area > div:last-child { flex: 0 0 auto; }');
         doc.write('table { border-collapse: collapse; width: 100%; }');
         doc.write('* { box-sizing: border-box; }');
         doc.write('<' + '/style>');
@@ -288,7 +285,7 @@
                 const win = window.open('', '_blank', 'width=850,height=900');
                 if (win) {
                     win.document.open();
-                    win.document.write('<!DOCTYPE html><html><' + 'head><title>{{ __('Delivery Challan') }}<' + '/title><style>@page{size:A4 portrait;margin:6mm 10mm;}html,body{margin:0;padding:0;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans Bengali", "Hind Siliguri", "Kalpurush", "SolaimanLipi", sans-serif;font-size:11px;}#challan-print-area{border:none!important;box-shadow:none!important;padding:0!important;}table{border-collapse:collapse;width:100%;}*{box-sizing:border-box;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}<' + '/style><' + '/head><' + 'body>' + printElement.innerHTML + '<' + '/body><' + '/html>');
+                    win.document.write('<!DOCTYPE html><html><' + 'head><title>{{ __('Delivery Challan') }}<' + '/title><style>@page{size:A4 portrait;margin:7mm 10mm;}html,body{height:100%;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans Bengali","Hind Siliguri",sans-serif;font-size:11px;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}#challan-print-area{height:100%;border:none!important;box-shadow:none!important;padding:0!important;display:flex;flex-direction:column;}.challan-copy{flex:1;display:flex;flex-direction:column;page-break-inside:avoid!important;}.challan-copy>div:last-child{flex:1;display:flex;flex-direction:column;justify-content:flex-end;}.challan-divider{flex:0 0 auto;}table{border-collapse:collapse;width:100%;}*{box-sizing:border-box;}<' + '/style><' + '/head><' + 'body>' + printElement.innerHTML + '<' + '/body><' + '/html>');
                     win.document.close();
                     win.focus();
                     win.print();
