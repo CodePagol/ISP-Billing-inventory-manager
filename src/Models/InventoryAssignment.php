@@ -15,7 +15,9 @@ class InventoryAssignment extends Model
     protected $table = 'inventory_assignments';
 
     protected $fillable = [
+        'challan_no',
         'item_id',
+        'replacement_for_item_id',
         'assigned_type',
         'customer_id',
         'customer_unique_id',
@@ -30,6 +32,23 @@ class InventoryAssignment extends Model
         'return_notes',
         'action_by',
     ];
+
+    public static function generateChallanNo(): string
+    {
+        $prefix = 'CH-' . date('Ym') . '-';
+        $last = static::where('challan_no', 'like', "{$prefix}%")->latest('id')->first();
+        if ($last && preg_match('/-(\d+)$/', $last->challan_no, $matches)) {
+            $num = (int) $matches[1] + 1;
+        } else {
+            $num = 1;
+        }
+        return $prefix . str_pad((string) $num, 4, '0', STR_PAD_LEFT);
+    }
+
+    public function replacementFor(): BelongsTo
+    {
+        return $this->belongsTo(InventoryItem::class, 'replacement_for_item_id');
+    }
 
     protected $casts = [
         'quantity'      => 'decimal:2',

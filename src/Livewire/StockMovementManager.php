@@ -19,6 +19,21 @@ class StockMovementManager extends Component
     public string $filterDateFrom = '';
     public string $filterDateTo = '';
 
+    public bool $showPrintChallan = false;
+    public ?InventoryAssignment $printAssignment = null;
+
+    public function printChallan(int $assignmentId): void
+    {
+        $this->printAssignment = InventoryAssignment::with(['item.category', 'customer', 'technician', 'actionUser'])->find($assignmentId);
+        $this->showPrintChallan = true;
+    }
+
+    public function closePrintChallan(): void
+    {
+        $this->showPrintChallan = false;
+        $this->printAssignment = null;
+    }
+
     public function switchTab(string $tab): void
     {
         $this->activeTab = $tab;

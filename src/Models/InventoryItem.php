@@ -18,6 +18,7 @@ class InventoryItem extends Model
 
     protected $fillable = [
         'category_id',
+        'batch_id',
         'expense_id',
         'title',
         'brand',
@@ -31,7 +32,9 @@ class InventoryItem extends Model
         'supplier',
         'warranty_months',
         'warranty_expiry',
+        'warranty_status',
         'status',
+        'damage_type',
         'current_location_type',
         'current_location_name',
         'assigned_customer_id',
@@ -63,6 +66,39 @@ class InventoryItem extends Model
         'retired'      => 'secondary',
     ];
 
+    public static array $damageTypes = [
+        'burned_surge'     => '⚡ Power Surge / Burned',
+        'lightning'        => '🌩️ Lightning / Thunder',
+        'fiber_cut'        => '✂️ Fiber Cable Cut / Broken Port',
+        'water_damage'     => '💧 Water Damage',
+        'motherboard_dead' => '🪦 Motherboard / Chipset Dead',
+        'adapter_dead'     => '🔌 Power Adapter Dead',
+        'firmware_brick'   => '⚠️ Firmware / Software Brick',
+        'other'            => '❓ Other Fault',
+    ];
+
+    public function getDamageTypeLabelAttribute(): string
+    {
+        return self::$damageTypes[$this->damage_type] ?? ($this->damage_type ? ucfirst(str_replace('_', ' ', $this->damage_type)) : '');
+    }
+
+    public function getWarrantyBadgeAttribute(): string
+    {
+        if ($this->warranty_status === 'under_warranty') {
+            return '<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25" style="font-size:11px;"><i class="bi bi-shield-check me-1"></i>Under Warranty</span>';
+        }
+        if ($this->warranty_status === 'out_of_warranty') {
+            return '<span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25" style="font-size:11px;"><i class="bi bi-shield-x me-1"></i>Out of Warranty</span>';
+        }
+        if ($this->warranty_status === 'sent_for_rma') {
+            return '<span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25" style="font-size:11px;"><i class="bi bi-arrow-repeat me-1"></i>Sent for RMA</span>';
+        }
+        if ($this->warranty_status === 'void') {
+            return '<span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25" style="font-size:11px;"><i class="bi bi-shield-slash me-1"></i>Warranty Void</span>';
+        }
+        return '';
+    }
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(InventoryCategory::class, 'category_id');
@@ -91,6 +127,36 @@ class InventoryItem extends Model
     public function stockLogs(): HasMany
     {
         return $this->hasMany(InventoryStockLog::class, 'item_id')->latest();
+    }
+
+    public function activeAssignment()
+    {
+        return $this->hasOne(InventoryAssignment::class, 'item_id')->where('status', 'deployed')->latestOfMany();
+    }
+
+    public function isSerialized(): bool
+    {
+        return $this->tracking_type === 'serialized';
+    }
+
+    public function isBulk(): bool
+    {
+        return $this->tracking_type === 'bulk';
+    }
+
+    public function scopeInStock($query)
+    {
+        return $query->where('status', 'in_stock');
+    }
+
+    public function scopeDeployed($query)
+    {
+        return $query->where('status', 'deployed');
+    }
+
+    public function scopeDamaged($query)
+    {
+        return $query->where('status', 'damaged');
     }
 
     public function getStatusLabelAttribute(): string

@@ -37,6 +37,9 @@ class ItemManager extends Component
     // Item Form
     public ?int $editItemId = null;
     public ?int $selectedExpenseId = null;
+    public bool $auto_create_expense = false;
+    public string $entryMode = 'single'; // 'single' or 'batch'
+    public string $batch_serials = '';
     public ?int $category_id = null;
     public string $title = '';
     public string $brand = '';
@@ -49,6 +52,7 @@ class ItemManager extends Component
     public string $purchase_date = '';
     public string $supplier = '';
     public int $warranty_months = 0;
+    public string $warranty_status = 'valid';
     public string $current_location_name = 'Main Store';
     public string $notes = '';
 
@@ -66,8 +70,11 @@ class ItemManager extends Component
 
     // Damage Form
     public string $damage_status = 'damaged'; // 'damaged' or 'under_repair'
+    public string $damage_type = 'Burned / Power Surge';
     public string $damage_reason = '';
     public string $damage_date = '';
+    public bool $replace_with_new = false;
+    public ?int $replacement_item_id = null;
 
     // Return Form
     public string $return_date = '';
@@ -76,6 +83,9 @@ class ItemManager extends Component
 
     // History Modal
     public ?InventoryItem $viewingItem = null;
+
+    // Challan Print
+    public ?InventoryAssignment $printAssignment = null;
 
     public function boot(): void
     {
@@ -169,11 +179,14 @@ class ItemManager extends Component
     {
         $this->reset([
             'editItemId', 'selectedExpenseId', 'title', 'brand', 'model_no',
-            'serial_number', 'mac_address', 'notes', 'supplier'
+            'serial_number', 'mac_address', 'notes', 'supplier', 'batch_serials'
         ]);
+        $this->entryMode = 'single';
+        $this->auto_create_expense = true;
         $this->quantity = 1;
         $this->purchase_price = 0;
         $this->warranty_months = 0;
+        $this->warranty_status = 'valid';
         $this->current_location_name = 'Main Store';
         $this->purchase_date = now()->format('Y-m-d');
 
@@ -186,10 +199,20 @@ class ItemManager extends Component
         $this->showItemModal = true;
     }
 
+    public function updatedBatchSerials(): void
+    {
+        $lines = array_filter(array_map('trim', explode("\n", $this->batch_serials)));
+        if (!empty($lines)) {
+            $this->quantity = count($lines);
+        }
+    }
+
     public function openEditItem(int $id): void
     {
         $item = InventoryItem::findOrFail($id);
         $this->editItemId            = $item->id;
+        $this->entryMode             = 'single';
+        $this->auto_create_expense   = false;
         $this->category_id           = $item->category_id;
         $this->selectedExpenseId     = $item->expense_id;
         $this->title                 = $item->title;
@@ -203,6 +226,7 @@ class ItemManager extends Component
         $this->purchase_date         = $item->purchase_date ? Carbon::parse($item->purchase_date)->format('Y-m-d') : '';
         $this->supplier              = $item->supplier ?? '';
         $this->warranty_months       = (int) $item->warranty_months;
+        $this->warranty_status       = $item->warranty_status ?? 'valid';
         $this->current_location_name = $item->current_location_name ?? 'Main Store';
         $this->notes                 = $item->notes ?? '';
 
@@ -213,6 +237,98 @@ class ItemManager extends Component
     {
         abortIfNoAccess(['Super Admin', 'Admin', 'Accountant'], ['site-setup', 'manage-expenses']);
 
+        // 1. Batch Serialized Entry
+        if ($this->entryMode === 'batch' && $this->tracking_type === 'serialized') {
+            $this->validate([
+                'category_id'           => 'required|exists:inventory_categories,id',
+                'title'                 => 'required|string|max:255',
+                'brand'                 => 'nullable|string|max:100',
+                'model_no'              => 'nullable|string|max:100',
+                'purchase_price'        => 'nullable|numeric|min:0',
+                'purchase_date'         => 'nullable|date',
+                'supplier'              => 'nullable|string|max:150',
+                'warranty_months'       => 'nullable|integer|min:0',
+                'current_location_name' => 'required|string|max:150',
+                'batch_serials'         => 'required|string',
+            ]);
+
+            $serials = array_values(array_filter(array_map('trim', explode("\n", $this->batch_serials))));
+            if (empty($serials)) {
+                $this->addError('batch_serials', 'Please enter at least one serial number.');
+                return;
+            }
+
+            // Check duplicate serials
+            $existing = InventoryItem::whereIn('serial_number', $serials)->pluck('serial_number')->toArray();
+            if (!empty($existing)) {
+                $this->addError('batch_serials', 'The following serial number(s) already exist: ' . implode(', ', array_slice($existing, 0, 3)));
+                return;
+            }
+
+            $batchId = 'BATCH-' . strtoupper(\Illuminate\Support\Str::random(8));
+            $warrantyExpiry = null;
+            if ($this->warranty_months > 0 && $this->purchase_date) {
+                $warrantyExpiry = Carbon::parse($this->purchase_date)->addMonths($this->warranty_months)->format('Y-m-d');
+            }
+
+            DB::transaction(function () use ($serials, $batchId, $warrantyExpiry) {
+                $expenseId = $this->selectedExpenseId;
+
+                if ($this->auto_create_expense && !$expenseId) {
+                    $totalAmount = (float) $this->purchase_price * count($serials);
+                    $expense = IspExpense::create([
+                        'category'     => 'item_purchase',
+                        'title'        => "Item Purchase: {$this->title} (" . count($serials) . " pcs)",
+                        'description'  => "Batch purchase from {$this->supplier}. Serials count: " . count($serials),
+                        'amount'       => $totalAmount,
+                        'expense_date' => $this->purchase_date ?: now(),
+                        'added_by'     => auth()->id(),
+                    ]);
+                    $expenseId = $expense->id;
+                }
+
+                foreach ($serials as $sn) {
+                    $item = InventoryItem::create([
+                        'category_id'           => $this->category_id,
+                        'batch_id'              => $batchId,
+                        'expense_id'            => $expenseId ?: null,
+                        'title'                 => $this->title,
+                        'brand'                 => $this->brand ?: null,
+                        'model_no'              => $this->model_no ?: null,
+                        'tracking_type'         => 'serialized',
+                        'serial_number'         => $sn,
+                        'quantity'              => 1,
+                        'purchase_price'        => $this->purchase_price,
+                        'purchase_date'         => $this->purchase_date ?: null,
+                        'supplier'              => $this->supplier ?: null,
+                        'warranty_months'       => $this->warranty_months,
+                        'warranty_expiry'       => $warrantyExpiry,
+                        'warranty_status'       => 'valid',
+                        'status'                => 'in_stock',
+                        'current_location_type' => 'warehouse',
+                        'current_location_name' => $this->current_location_name,
+                        'notes'                 => $this->notes ?: null,
+                        'created_by'            => auth()->id(),
+                    ]);
+
+                    InventoryStockLog::create([
+                        'item_id'         => $item->id,
+                        'type'            => 'purchase',
+                        'quantity_change' => 1,
+                        'balance_after'   => 1,
+                        'reference_no'    => $expenseId ? 'EXP-' . $expenseId : null,
+                        'note'            => "Batch purchase ({$sn}). Supplier: {$this->supplier}",
+                        'user_id'         => auth()->id(),
+                    ]);
+                }
+            });
+
+            flash()->success("Successfully added " . count($serials) . " serialized items to inventory!");
+            $this->showItemModal = false;
+            return;
+        }
+
+        // 2. Single Item Entry
         $rules = [
             'category_id'           => 'required|exists:inventory_categories,id',
             'title'                 => 'required|string|max:255',
@@ -244,9 +360,23 @@ class ItemManager extends Component
             $warrantyExpiry = Carbon::parse($this->purchase_date)->addMonths($this->warranty_months)->format('Y-m-d');
         }
 
+        $expenseId = $this->selectedExpenseId;
+        if ($this->auto_create_expense && !$expenseId && !$this->editItemId) {
+            $totalAmount = (float) $this->purchase_price * (float) $this->quantity;
+            $expense = IspExpense::create([
+                'category'     => 'item_purchase',
+                'title'        => "Item Purchase: {$this->title}",
+                'description'  => "Purchased from {$this->supplier}. Quantity: {$this->quantity}",
+                'amount'       => $totalAmount,
+                'expense_date' => $this->purchase_date ?: now(),
+                'added_by'     => auth()->id(),
+            ]);
+            $expenseId = $expense->id;
+        }
+
         $data = [
             'category_id'           => $this->category_id,
-            'expense_id'            => $this->selectedExpenseId ?: null,
+            'expense_id'            => $expenseId ?: null,
             'title'                 => $this->title,
             'brand'                 => $this->brand ?: null,
             'model_no'              => $this->model_no ?: null,
@@ -259,6 +389,7 @@ class ItemManager extends Component
             'supplier'              => $this->supplier ?: null,
             'warranty_months'       => $this->warranty_months,
             'warranty_expiry'       => $warrantyExpiry,
+            'warranty_status'       => $this->warranty_status ?: 'valid',
             'current_location_name' => $this->current_location_name,
             'notes'                 => $this->notes ?: null,
             'created_by'            => auth()->id(),
@@ -280,7 +411,7 @@ class ItemManager extends Component
                     'type'            => 'purchase',
                     'quantity_change' => $item->quantity,
                     'balance_after'   => $item->quantity,
-                    'reference_no'    => $this->selectedExpenseId ? 'EXP-' . $this->selectedExpenseId : null,
+                    'reference_no'    => $item->expense_id ? 'EXP-' . $item->expense_id : null,
                     'note'            => "Initial stock added / purchased. Location: {$item->current_location_name}",
                     'user_id'         => auth()->id(),
                 ]);
@@ -334,9 +465,12 @@ class ItemManager extends Component
 
         $customer = $this->deploy_customer_id ? CustomersInfo::find($this->deploy_customer_id) : null;
 
-        DB::transaction(function () use ($item, $customer) {
+        $createdAssign = null;
+        DB::transaction(function () use ($item, $customer, &$createdAssign) {
             // 1. Create Assignment record
-            InventoryAssignment::create([
+            $challanNo = InventoryAssignment::generateChallanNo();
+            $createdAssign = InventoryAssignment::create([
+                'challan_no'          => $challanNo,
                 'item_id'             => $item->id,
                 'assigned_type'       => $this->deploy_type,
                 'customer_id'         => $customer?->id,
@@ -378,10 +512,15 @@ class ItemManager extends Component
                 'type'            => 'withdraw',
                 'quantity_change' => -$this->deploy_quantity,
                 'balance_after'   => $balanceAfter,
+                'reference_no'    => $createdAssign->challan_no,
                 'note'            => "Withdrawn / Deployed to: {$this->deploy_destination}. Purpose: {$this->deploy_purpose}",
                 'user_id'         => auth()->id(),
             ]);
         });
+
+        if ($createdAssign) {
+            $this->printAssignment = $createdAssign->load(['item.category', 'customer', 'technician', 'actionUser']);
+        }
 
         flash()->success("Item successfully withdrawn and assigned to {$this->deploy_destination}!");
         $this->showDeployModal = false;
@@ -393,17 +532,24 @@ class ItemManager extends Component
     {
         $this->actionItemId = $itemId;
         $this->damage_status = 'damaged';
+        $this->damage_type = 'Burned / Power Surge';
         $this->damage_reason = '';
         $this->damage_date = now()->format('Y-m-d');
+        $this->warranty_status = 'valid';
+        $this->replace_with_new = false;
+        $this->replacement_item_id = null;
         $this->showDamageModal = true;
     }
 
     public function submitDamage(): void
     {
         $this->validate([
-            'damage_status' => 'required|in:damaged,under_repair',
-            'damage_reason' => 'required|string|max:1000',
-            'damage_date'   => 'required|date',
+            'damage_status'       => 'required|in:damaged,under_repair',
+            'damage_type'         => 'required|string|max:100',
+            'damage_reason'       => 'required|string|max:1000',
+            'damage_date'         => 'required|date',
+            'warranty_status'     => 'required|in:valid,expired,claimed,replaced,scrapped',
+            'replacement_item_id' => $this->replace_with_new ? 'required|exists:inventory_items,id' : 'nullable',
         ]);
 
         $item = InventoryItem::findOrFail($this->actionItemId);
@@ -411,8 +557,10 @@ class ItemManager extends Component
         DB::transaction(function () use ($item) {
             $prevStatus = $item->status;
             $item->status = $this->damage_status;
+            $item->damage_type = $this->damage_type;
+            $item->warranty_status = $this->warranty_status;
             $item->notes = ($item->notes ? $item->notes . "\n" : '') .
-                "[" . $this->damage_date . "] Marked as " . strtoupper($this->damage_status) . ": " . $this->damage_reason;
+                "[" . $this->damage_date . "] Marked as " . strtoupper($this->damage_status) . " ({$this->damage_type}): " . $this->damage_reason;
             $item->save();
 
             // If it had an active assignment, mark assignment as damaged
@@ -420,7 +568,7 @@ class ItemManager extends Component
             if ($activeAssignment) {
                 $activeAssignment->status = 'damaged';
                 $activeAssignment->return_date = $this->damage_date;
-                $activeAssignment->return_notes = "Fault/Damage reported: " . $this->damage_reason;
+                $activeAssignment->return_notes = "Fault/Damage reported ({$this->damage_type}): " . $this->damage_reason;
                 $activeAssignment->save();
             }
 
@@ -429,13 +577,78 @@ class ItemManager extends Component
                 'type'            => 'damaged',
                 'quantity_change' => 0,
                 'balance_after'   => $item->quantity,
-                'note'            => "Marked as " . ucfirst($this->damage_status) . ". Reason: " . $this->damage_reason,
+                'note'            => "Marked as " . ucfirst($this->damage_status) . " ({$this->damage_type}). Reason: " . $this->damage_reason,
                 'user_id'         => auth()->id(),
             ]);
+
+            // If replacement was selected:
+            if ($this->replace_with_new && $this->replacement_item_id) {
+                $replacement = InventoryItem::findOrFail($this->replacement_item_id);
+                $replacement->status = 'deployed';
+                $replacement->current_location_type = $item->current_location_type;
+                $replacement->current_location_name = $item->current_location_name;
+                $replacement->assigned_customer_id = $item->assigned_customer_id;
+                $replacement->assigned_user_id = $item->assigned_user_id;
+                $replacement->save();
+
+                $challan = InventoryAssignment::generateChallanNo();
+                $assign = InventoryAssignment::create([
+                    'challan_no'              => $challan,
+                    'item_id'                 => $replacement->id,
+                    'replacement_for_item_id' => $item->id,
+                    'assigned_type'           => $item->current_location_type,
+                    'customer_id'             => $item->assigned_customer_id,
+                    'customer_unique_id'      => $item->customer?->customer_unique_id,
+                    'customer_name'           => $item->customer?->customer_name,
+                    'assigned_to_user_id'     => auth()->id(),
+                    'destination_title'       => $item->current_location_name,
+                    'quantity'                => 1,
+                    'withdraw_date'           => $this->damage_date,
+                    'status'                  => 'deployed',
+                    'purpose'                 => "Replacement for damaged [{$item->title} - SN: {$item->serial_number}]",
+                    'action_by'               => auth()->id(),
+                ]);
+
+                InventoryStockLog::create([
+                    'item_id'         => $replacement->id,
+                    'type'            => 'withdraw',
+                    'quantity_change' => -1,
+                    'balance_after'   => 0,
+                    'note'            => "Immediate replacement for damaged Item #{$item->id} ({$item->serial_number})",
+                    'user_id'         => auth()->id(),
+                ]);
+
+                $this->printAssignment = $assign->load(['item.category', 'customer', 'technician', 'actionUser']);
+            }
         });
 
         flash()->warning("Item [{$item->title}] reported as " . ucfirst($this->damage_status) . ".");
         $this->showDamageModal = false;
+    }
+
+    public function getAvailableReplacementItemsProperty()
+    {
+        if (!$this->actionItemId) {
+            return collect();
+        }
+        $item = InventoryItem::find($this->actionItemId);
+        if (!$item) {
+            return collect();
+        }
+        return InventoryItem::where('category_id', $item->category_id)
+            ->where('status', 'in_stock')
+            ->where('id', '!=', $item->id)
+            ->get();
+    }
+
+    public function printChallan(int $assignmentId): void
+    {
+        $this->printAssignment = InventoryAssignment::with(['item.category', 'customer', 'technician', 'actionUser'])->findOrFail($assignmentId);
+    }
+
+    public function closePrintChallan(): void
+    {
+        $this->printAssignment = null;
     }
 
     // ── Return to Stock ───────────────────────────────────────────────────────

@@ -81,12 +81,14 @@
                         <thead class="table-light">
                             <tr class="text-muted small text-uppercase">
                                 <th>{{ __('Withdrawn Date') }}</th>
+                                <th>{{ __('Challan No') }}</th>
                                 <th>{{ __('Item & Serial') }}</th>
                                 <th>{{ __('Destination / Customer') }}</th>
                                 <th>{{ __('Technician') }}</th>
                                 <th>{{ __('Quantity') }}</th>
                                 <th>{{ __('Status') }}</th>
                                 <th>{{ __('Return Date') }}</th>
+                                <th class="text-end">{{ __('Challan / Slip') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -94,6 +96,15 @@
                                 <tr>
                                     <td class="small fw-semibold text-dark">
                                         {{ $row->withdraw_date ? $row->withdraw_date->format('d M, Y') : '-' }}
+                                    </td>
+                                    <td>
+                                        @if($row->challan_no)
+                                            <span class="badge bg-light text-dark border">
+                                                <i class="bi bi-receipt text-primary me-1"></i>{{ $row->challan_no }}
+                                            </span>
+                                        @else
+                                            <span class="text-muted small">-</span>
+                                        @endif
                                     </td>
                                     <td>
                                         <div class="fw-bold text-dark">{{ $row->item?->title }}</div>
@@ -106,6 +117,11 @@
                                     </td>
                                     <td>
                                         <div class="small fw-semibold text-dark">{{ $row->destination_title }}</div>
+                                        @if($row->customer)
+                                            <small class="text-primary d-block">
+                                                <i class="bi bi-person me-1"></i>{{ $row->customer->customer_name }} ({{ $row->customer->customer_unique_id }})
+                                            </small>
+                                        @endif
                                         @if($row->purpose)
                                             <small class="text-muted">{{ Str::limit($row->purpose, 50) }}</small>
                                         @endif
@@ -134,10 +150,15 @@
                                             <div class="fst-italic text-secondary" style="font-size:11px;">{{ Str::limit($row->return_notes, 40) }}</div>
                                         @endif
                                     </td>
+                                    <td class="text-end">
+                                        <button wire:click="printChallan({{ $row->id }})" class="btn btn-sm btn-outline-primary rounded-3" title="{{ __('Print Gate Pass / Challan') }}">
+                                            <i class="bi bi-printer me-1"></i>{{ __('Slip') }}
+                                        </button>
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="text-center py-5 text-muted">
+                                    <td colspan="9" class="text-center py-5 text-muted">
                                         {{ __('No assignment records found.') }}
                                     </td>
                                 </tr>
@@ -196,5 +217,8 @@
         </div>
 
     </div>
+
+    {{-- Challan / Gate Pass Modal --}}
+    @include('inventory-manager::partials.challan-modal')
 </div>
 
