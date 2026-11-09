@@ -46,6 +46,11 @@ class Plugin extends AbstractPlugin
     {
         parent::boot($app);
 
+        // Register JSON translations from plugin resources/lang directory
+        if (is_dir($this->pluginPath('resources/lang'))) {
+            $app['translator']->addJsonPath($this->pluginPath('resources/lang'));
+        }
+
         // Register Livewire components (using standard hyphen and dot notation without colons)
         if (class_exists(Livewire::class)) {
             Livewire::component('inventory-dashboard', InventoryDashboard::class);

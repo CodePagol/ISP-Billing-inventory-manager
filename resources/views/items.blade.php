@@ -256,7 +256,7 @@
                                         <i class="bi bi-box me-1"></i> {{ __('Single Item Entry') }}
                                     </button>
                                     <button type="button" wire:click="$set('entryMode', 'batch')" class="btn {{ $entryMode === 'batch' ? 'btn-primary' : 'btn-outline-secondary' }} fw-semibold">
-                                        <i class="bi bi-upc-scan me-1"></i> {{ __('Bulk Serial Scanner / Batch Import (সিরিয়াল স্ক্যানার)') }}
+                                        <i class="bi bi-upc-scan me-1"></i> {{ __('Bulk Serial Scanner / Batch Import') }}
                                     </button>
                                 </div>
                             @endif
@@ -308,7 +308,7 @@
                                         <div class="p-3 rounded-3 bg-light border border-primary border-opacity-25">
                                             <div class="d-flex align-items-center justify-content-between mb-2">
                                                 <label class="form-label small fw-bold text-primary mb-0">
-                                                    <i class="bi bi-upc-scan me-1"></i> {{ __('Batch Serial Numbers (১ টি প্রতি লাইনে অথবা কমা দিয়ে লিখুন/স্ক্যান করুন)') }} <span class="text-danger">*</span>
+                                                    <i class="bi bi-upc-scan me-1"></i> {{ __('Batch Serial Numbers (One per line or comma-separated)') }} <span class="text-danger">*</span>
                                                 </label>
                                                 @php
                                                     $countSerials = count(array_filter(array_map('trim', preg_split('/[\r\n,]+/', (string)$batch_serials))));
@@ -537,8 +537,8 @@ ONU-2026-0004
                                 <div class="col-md-6">
                                     <label class="form-label small fw-semibold">{{ __('Status Type') }}</label>
                                     <select wire:model="damage_status" class="form-select rounded-3">
-                                        <option value="damaged">{{ __('Damaged / Broken (নষ্ট হয়ে গেছে)') }}</option>
-                                        <option value="under_repair">{{ __('Under Repair (মেরামতে পাঠানো হয়েছে)') }}</option>
+                                        <option value="damaged">{{ __('Damaged / Broken') }}</option>
+                                        <option value="under_repair">{{ __('Under Repair') }}</option>
                                     </select>
                                 </div>
                                 <div class="col-md-6">
@@ -548,23 +548,23 @@ ONU-2026-0004
                                 <div class="col-md-6">
                                     <label class="form-label small fw-semibold">{{ __('Damage Cause / Diagnosis') }} <span class="text-danger">*</span></label>
                                     <select wire:model="damage_type" class="form-select rounded-3">
-                                        <option value="burned_surge">⚡ Power Surge / Burned (বজ্রপাত / বিদ্যুৎ ভোল্টেজ)</option>
-                                        <option value="lightning">🌩️ Lightning / Thunder (বজ্রপাত)</option>
-                                        <option value="fiber_cut">✂️ Fiber Cable Cut / Broken Port (ফাইবার কাটা/পোর্ট ভাঙ্গা)</option>
-                                        <option value="water_damage">💧 Water Damage (পানি পড়া / আর্দ্রতা)</option>
-                                        <option value="motherboard_dead">🪦 Motherboard / Chipset Dead (মাদারবোর্ড নষ্ট)</option>
-                                        <option value="adapter_dead">🔌 Power Adapter Dead (এডাপ্টার নষ্ট)</option>
-                                        <option value="firmware_brick">⚠️ Firmware / Software Brick (সফটওয়্যার নষ্ট)</option>
-                                        <option value="other">❓ Other / Unknown (অন্যান্য)</option>
+                                        <option value="burned_surge">⚡ {{ __('Power Surge / Burned') }}</option>
+                                        <option value="lightning">🌩️ {{ __('Lightning / Thunder') }}</option>
+                                        <option value="fiber_cut">✂️ {{ __('Fiber Cable Cut / Broken Port') }}</option>
+                                        <option value="water_damage">💧 {{ __('Water Damage') }}</option>
+                                        <option value="motherboard_dead">🪦 {{ __('Motherboard / Chipset Dead') }}</option>
+                                        <option value="adapter_dead">🔌 {{ __('Power Adapter Dead') }}</option>
+                                        <option value="firmware_brick">⚠️ {{ __('Firmware / Software Brick') }}</option>
+                                        <option value="other">❓ {{ __('Other / Unknown') }}</option>
                                     </select>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label small fw-semibold">{{ __('Warranty Status') }}</label>
                                     <select wire:model="warranty_status" class="form-select rounded-3">
-                                        <option value="under_warranty">🛡️ Under Warranty (ওয়ারেন্টি রয়েছে)</option>
-                                        <option value="out_of_warranty">❌ Out of Warranty (ওয়ারেন্টি শেষ)</option>
-                                        <option value="sent_for_rma">🔄 Sent to Vendor for RMA</option>
-                                        <option value="void">🚫 Warranty Void (ভঙ্গ হয়েছে)</option>
+                                        <option value="under_warranty">🛡️ {{ __('Under Warranty') }}</option>
+                                        <option value="out_of_warranty">❌ {{ __('Out of Warranty') }}</option>
+                                        <option value="sent_for_rma">🔄 {{ __('Sent to Vendor for RMA') }}</option>
+                                        <option value="void">🚫 {{ __('Warranty Void') }}</option>
                                     </select>
                                 </div>
                                 <div class="col-12">
@@ -580,7 +580,7 @@ ONU-2026-0004
                                             <div class="form-check form-switch mb-2">
                                                 <input class="form-check-input" type="checkbox" role="switch" id="replaceCustomerCheck" wire:model.live="replace_for_customer">
                                                 <label class="form-check-label fw-bold text-dark small" for="replaceCustomerCheck">
-                                                    <i class="bi bi-arrow-repeat text-primary me-1"></i> {{ __('One-Click Customer Replacement (গ্রাহককে সাথে সাথে নতুন ডিভাইস দিন)') }}
+                                                    <i class="bi bi-arrow-repeat text-primary me-1"></i> {{ __('One-Click Customer Replacement') }}
                                                 </label>
                                             </div>
                                             @if($replace_for_customer)
