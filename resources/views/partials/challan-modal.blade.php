@@ -148,17 +148,17 @@
 
             <div class="modal-footer border-0 px-4 py-3" style="background:#f8f9fc;">
                 <button type="button" wire:click="closePrintChallan" class="btn btn-light rounded-3 px-4">{{ __('Close') }}</button>
-                <button type="button" onclick="doPrintChallan()" class="btn btn-success rounded-3 px-5 fw-semibold shadow-sm">
+                <button type="button" onclick="window.doPrintChallan()" class="btn btn-success rounded-3 px-5 fw-semibold shadow-sm">
                     <i class="bi bi-printer me-2"></i> {{ __('Print Gate Pass') }}
                 </button>
             </div>
         </div>
     </div>
 </div>
+@endif
 
-@push('scripts')
 <script>
-    function doPrintChallan() {
+    window.doPrintChallan = function() {
         const printElement = document.getElementById('challan-print-area');
         if (!printElement) {
             console.error('#challan-print-area not found');
@@ -167,11 +167,12 @@
 
         const iframe = document.createElement('iframe');
         iframe.style.position = 'fixed';
+        iframe.style.right = '0';
+        iframe.style.bottom = '0';
         iframe.style.width = '0px';
         iframe.style.height = '0px';
-        iframe.style.visibility = 'hidden';
         iframe.style.border = 'none';
-        iframe.style.zIndex = '-1';
+        iframe.style.visibility = 'hidden';
         document.body.appendChild(iframe);
 
         let cssLinks = Array.from(document.querySelectorAll('link[rel=stylesheet]'))
@@ -182,18 +183,39 @@
         doc.open();
         doc.write('<!DOCTYPE html><html><head><title>Challan Gate Pass</title>');
         doc.write(cssLinks);
-        doc.write('<style>body { background-color: white !important; margin: 20px; font-family: sans-serif; } * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }</style>');
+        doc.write('<style>body { background-color: white !important; margin: 20px; font-family: sans-serif; } * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } @media print { @page { size: auto; margin: 15mm; } }</style>');
         doc.write('</head><body>');
         doc.write(printElement.outerHTML);
         doc.write('</body></html>');
         doc.close();
 
         setTimeout(() => {
-            iframe.contentWindow.focus();
-            iframe.contentWindow.print();
-            setTimeout(() => document.body.removeChild(iframe), 1000);
+            try {
+                iframe.contentWindow.focus();
+                iframe.contentWindow.print();
+            } catch (err) {
+                console.error('Print error:', err);
+                window.print();
+            }
+            setTimeout(() => {
+                if (iframe.parentNode) {
+                    document.body.removeChild(iframe);
+                }
+            }, 2000);
         }, 500);
+    };
+</script>
+
+@push('scripts')
+<script>
+    if (typeof window.doPrintChallan === 'undefined') {
+        window.doPrintChallan = function() {
+            const printElement = document.getElementById('challan-print-area');
+            if (printElement) {
+                window.print();
+            }
+        };
     }
 </script>
 @endpush
-@endif
+
