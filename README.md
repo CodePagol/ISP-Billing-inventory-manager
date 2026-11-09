@@ -62,3 +62,4 @@ plugins/inventory-manager/
 
 ## 📜 License
 Proprietary / MIT - Developed for ISP Mikrotik Billing.
+
