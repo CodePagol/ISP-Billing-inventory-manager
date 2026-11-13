@@ -15,27 +15,65 @@ class InventoryDashboard extends Component
         abortIfNoAccess(['Super Admin', 'Admin', 'Accountant'], ['site-setup', 'manage-expenses']);
 
         $totalItems = InventoryItem::count();
-        $inStockCount = InventoryItem::where('status', 'in_stock')->sum('quantity');
-        $deployedCount = InventoryItem::where('status', 'deployed')->sum('quantity');
-        $damagedCount = InventoryItem::where('status', 'damaged')->sum('quantity');
-        $underRepairCount = InventoryItem::where('status', 'under_repair')->sum('quantity');
+        $inStockCount = (float) InventoryItem::where('status', 'in_stock')->sum('quantity');
+        
+        $deployedSerialized = (float) InventoryItem::where('tracking_type', 'serialized')
+            ->where('status', 'deployed')
+            ->sum('quantity');
+        $deployedBulk = (float) InventoryAssignment::whereHas('item', fn($q) => $q->where('tracking_type', 'bulk'))
+            ->where('status', 'deployed')
+            ->sum('quantity');
+        $deployedCount = $deployedSerialized + $deployedBulk;
+
+        $damagedCount = (float) InventoryItem::where('status', 'damaged')->sum('quantity');
+        $underRepairCount = (float) InventoryItem::where('status', 'under_repair')->sum('quantity');
 
         $totalValuation = InventoryItem::whereIn('status', ['in_stock', 'deployed'])
             ->selectRaw('SUM(purchase_price * (CASE WHEN tracking_type = "bulk" THEN quantity ELSE 1 END)) as val')
             ->value('val') ?? 0;
 
-        $categories = InventoryCategory::withCount([
-            'items as total_items',
-            'items as in_stock_items' => function ($q) {
-                $q->where('status', 'in_stock');
-            },
-            'items as deployed_items' => function ($q) {
-                $q->where('status', 'deployed');
-            },
-            'items as damaged_items' => function ($q) {
-                $q->where('status', 'damaged');
-            },
-        ])->get();
+        $categories = InventoryCategory::all()->map(function ($cat) {
+            $inStockQty = (float) InventoryItem::where('category_id', $cat->id)
+                ->where('status', 'in_stock')
+                ->sum('quantity');
+
+            $depSerialized = (float) InventoryItem::where('category_id', $cat->id)
+                ->where('tracking_type', 'serialized')
+                ->where('status', 'deployed')
+                ->sum('quantity');
+
+            $depBulk = (float) InventoryAssignment::whereHas('item', fn($q) => $q->where('category_id', $cat->id)->where('tracking_type', 'bulk'))
+                ->where('status', 'deployed')
+                ->sum('quantity');
+
+            $deployedQty = $depSerialized + $depBulk;
+
+            $underRepairQty = (float) InventoryItem::where('category_id', $cat->id)
+                ->where('status', 'under_repair')
+                ->sum('quantity');
+
+            $damagedQty = (float) InventoryItem::where('category_id', $cat->id)
+                ->where('status', 'damaged')
+                ->sum('quantity');
+
+            $retiredQty = (float) InventoryItem::where('category_id', $cat->id)
+                ->where('status', 'retired')
+                ->sum('quantity');
+
+            $totalQty = $inStockQty + $deployedQty + $underRepairQty + $damagedQty + $retiredQty;
+
+            $cat->in_stock_qty     = $inStockQty;
+            $cat->deployed_qty     = $deployedQty;
+            $cat->under_repair_qty = $underRepairQty;
+            $cat->damaged_qty      = $damagedQty;
+            $cat->retired_qty      = $retiredQty;
+            $cat->total_qty        = $totalQty;
+            $cat->total_items      = InventoryItem::where('category_id', $cat->id)->count();
+
+            return $cat;
+        })->sortByDesc(function ($cat) {
+            return ($cat->total_qty > 0 ? 1000000 + $cat->total_qty : 0);
+        })->values();
 
         $recentAssignments = InventoryAssignment::with(['item.category', 'customer', 'technician'])
             ->latest()

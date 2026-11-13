@@ -85,18 +85,30 @@
                                     </div>
                                     <div class="d-flex justify-content-between align-items-center text-muted small mb-1">
                                         <span>{{ __('In Stock:') }}</span>
-                                        <span class="fw-bold text-success">{{ $cat->in_stock_items }} {{ $cat->unit }}</span>
+                                        <span class="fw-bold text-success">{{ $cat->in_stock_qty }} {{ $cat->unit }}</span>
                                     </div>
-                                    <div class="d-flex justify-content-between align-items-center text-muted small">
+                                    <div class="d-flex justify-content-between align-items-center text-muted small mb-1">
                                         <span>{{ __('Deployed:') }}</span>
-                                        <span class="fw-bold text-primary">{{ $cat->deployed_items }} {{ $cat->unit }}</span>
+                                        <span class="fw-bold text-primary">{{ $cat->deployed_qty }} {{ $cat->unit }}</span>
                                     </div>
+                                    @if($cat->under_repair_qty > 0)
+                                        <div class="d-flex justify-content-between align-items-center text-muted small mb-1">
+                                            <span>{{ __('Under Repair:') }}</span>
+                                            <span class="fw-bold text-warning">{{ $cat->under_repair_qty }} {{ $cat->unit }}</span>
+                                        </div>
+                                    @endif
+                                    @if($cat->damaged_qty > 0)
+                                        <div class="d-flex justify-content-between align-items-center text-muted small">
+                                            <span>{{ __('Damaged:') }}</span>
+                                            <span class="fw-bold text-danger">{{ $cat->damaged_qty }} {{ $cat->unit }}</span>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
 
                             <div class="d-flex align-items-center justify-content-between pt-2 border-top">
                                 <span class="small text-muted fw-semibold">
-                                    <i class="bi bi-box me-1"></i>{{ $cat->total_items }} {{ __('Items') }}
+                                    <i class="bi bi-box me-1"></i>{{ $cat->total_qty }} {{ $cat->unit }} ({{ $cat->total_items }} {{ __('Entries') }})
                                 </span>
                                 <div class="btn-group btn-group-sm">
                                     <button wire:click="openEdit({{ $cat->id }})" class="btn btn-outline-secondary rounded-start-3" title="{{ __('Edit Category') }}">

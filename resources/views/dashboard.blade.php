@@ -108,25 +108,57 @@
                 <div class="row g-3">
                     @forelse($categories as $cat)
                         <div class="col-md-4 col-lg-3">
-                            <div class="p-3 rounded-4 border bg-light bg-opacity-50 h-100">
-                                <div class="d-flex align-items-center justify-content-between mb-2">
-                                    <span class="fw-bold text-dark">
-                                        <i class="bi {{ $cat->icon ?? 'bi-box' }} text-primary me-1"></i> {{ $cat->name }}
-                                    </span>
-                                    <span class="badge bg-secondary rounded-pill">{{ ucfirst($cat->tracking_type) }}</span>
-                                </div>
-                                <div class="d-flex justify-content-between text-muted small mb-1">
-                                    <span>{{ __('In Stock:') }}</span>
-                                    <span class="fw-bold text-success">{{ $cat->in_stock_items }} {{ $cat->unit }}</span>
-                                </div>
-                                <div class="d-flex justify-content-between text-muted small mb-1">
-                                    <span>{{ __('Deployed:') }}</span>
-                                    <span class="fw-bold text-primary">{{ $cat->deployed_items }} {{ $cat->unit }}</span>
-                                </div>
-                                @if($cat->damaged_items > 0)
+                            <div class="p-3 rounded-4 border {{ $cat->total_qty > 0 ? 'bg-white shadow-sm border-primary border-opacity-25' : 'bg-light bg-opacity-50' }} h-100 d-flex flex-column justify-content-between">
+                                <div>
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <span class="fw-bold text-dark text-truncate" title="{{ $cat->name }}">
+                                            <i class="bi {{ $cat->icon ?? 'bi-box-seam' }} text-primary me-1"></i> {{ $cat->name }}
+                                        </span>
+                                        <span class="badge {{ $cat->tracking_type === 'serialized' ? 'bg-primary' : 'bg-success' }} bg-opacity-15 text-{{ $cat->tracking_type === 'serialized' ? 'primary' : 'success' }} rounded-pill small">
+                                            {{ ucfirst($cat->tracking_type) }}
+                                        </span>
+                                    </div>
+
+                                    {{-- Total Stock Pill --}}
+                                    <div class="d-flex justify-content-between align-items-center bg-light rounded-3 px-2 py-1 mb-2 small">
+                                        <span class="text-muted fw-semibold">{{ __('Total Stock:') }}</span>
+                                        <span class="fw-bold text-dark">{{ $cat->total_qty }} {{ $cat->unit }}</span>
+                                    </div>
+
+                                    {{-- Status Breakdown --}}
                                     <div class="d-flex justify-content-between text-muted small mb-1">
-                                        <span>{{ __('Damaged:') }}</span>
-                                        <span class="fw-bold text-danger">{{ $cat->damaged_items }} {{ $cat->unit }}</span>
+                                        <span>{{ __('In Stock:') }}</span>
+                                        <span class="fw-bold text-success">{{ $cat->in_stock_qty }} {{ $cat->unit }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between text-muted small mb-1">
+                                        <span>{{ __('Deployed:') }}</span>
+                                        <span class="fw-bold text-primary">{{ $cat->deployed_qty }} {{ $cat->unit }}</span>
+                                    </div>
+                                    @if($cat->under_repair_qty > 0)
+                                        <div class="d-flex justify-content-between text-muted small mb-1">
+                                            <span>{{ __('Under Repair:') }}</span>
+                                            <span class="fw-bold text-warning">{{ $cat->under_repair_qty }} {{ $cat->unit }}</span>
+                                        </div>
+                                    @endif
+                                    @if($cat->damaged_qty > 0)
+                                        <div class="d-flex justify-content-between text-muted small mb-1">
+                                            <span>{{ __('Damaged:') }}</span>
+                                            <span class="fw-bold text-danger">{{ $cat->damaged_qty }} {{ $cat->unit }}</span>
+                                        </div>
+                                    @endif
+                                    @if($cat->retired_qty > 0)
+                                        <div class="d-flex justify-content-between text-muted small mb-1">
+                                            <span>{{ __('Retired:') }}</span>
+                                            <span class="fw-bold text-secondary">{{ $cat->retired_qty }} {{ $cat->unit }}</span>
+                                        </div>
+                                    @endif
+                                </div>
+
+                                @if($cat->total_qty > 0)
+                                    <div class="pt-2 mt-2 border-top text-end">
+                                        <a href="{{ route('admin.inventory.items') }}?filterCategory={{ $cat->id }}" class="text-decoration-none small text-primary fw-semibold" style="font-size: 11px;">
+                                            {{ __('View Items') }} &rarr;
+                                        </a>
                                     </div>
                                 @endif
                             </div>

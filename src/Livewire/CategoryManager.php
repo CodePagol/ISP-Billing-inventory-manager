@@ -5,7 +5,9 @@ namespace Plugins\InventoryManager\Livewire;
 use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Plugins\InventoryManager\Models\InventoryAssignment;
 use Plugins\InventoryManager\Models\InventoryCategory;
+use Plugins\InventoryManager\Models\InventoryItem;
 
 class CategoryManager extends Component
 {
@@ -171,6 +173,46 @@ class CategoryManager extends Component
         }
 
         $categories = $query->orderBy('name')->paginate(12);
+
+        $categories->getCollection()->transform(function ($cat) {
+            $inStockQty = (float) InventoryItem::where('category_id', $cat->id)
+                ->where('status', 'in_stock')
+                ->sum('quantity');
+
+            $depSerialized = (float) InventoryItem::where('category_id', $cat->id)
+                ->where('tracking_type', 'serialized')
+                ->where('status', 'deployed')
+                ->sum('quantity');
+
+            $depBulk = (float) InventoryAssignment::whereHas('item', fn($q) => $q->where('category_id', $cat->id)->where('tracking_type', 'bulk'))
+                ->where('status', 'deployed')
+                ->sum('quantity');
+
+            $deployedQty = $depSerialized + $depBulk;
+
+            $underRepairQty = (float) InventoryItem::where('category_id', $cat->id)
+                ->where('status', 'under_repair')
+                ->sum('quantity');
+
+            $damagedQty = (float) InventoryItem::where('category_id', $cat->id)
+                ->where('status', 'damaged')
+                ->sum('quantity');
+
+            $retiredQty = (float) InventoryItem::where('category_id', $cat->id)
+                ->where('status', 'retired')
+                ->sum('quantity');
+
+            $totalQty = $inStockQty + $deployedQty + $underRepairQty + $damagedQty + $retiredQty;
+
+            $cat->in_stock_qty     = $inStockQty;
+            $cat->deployed_qty     = $deployedQty;
+            $cat->under_repair_qty = $underRepairQty;
+            $cat->damaged_qty      = $damagedQty;
+            $cat->retired_qty      = $retiredQty;
+            $cat->total_qty        = $totalQty;
+
+            return $cat;
+        });
 
         return view('inventory-manager::categories', [
             'categories' => $categories,
