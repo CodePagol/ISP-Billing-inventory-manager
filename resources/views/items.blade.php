@@ -100,7 +100,7 @@
                                             &bull; <span class="badge bg-light text-secondary border">Batch: {{ $item->batch_id }}</span>
                                         @endif
                                         @if($item->expense)
-                                            &bull; <span class="badge bg-light text-dark border"><i class="bi bi-wallet2 text-danger me-1"></i>{{ $item->expense->reference_no }}</span>
+                                            &bull; <a href="{{ route('admin.expenses') }}?search={{ $item->expense->reference_no }}" target="_blank" class="badge bg-light text-primary border text-decoration-none" title="{{ __('View Expense Record') }}"><i class="bi bi-wallet2 text-danger me-1"></i>{{ $item->expense->reference_no }}</a>
                                         @endif
                                     </div>
                                 </td>
@@ -684,6 +684,32 @@ ONU-2026-0004
                         <button type="button" wire:click="$set('showHistoryModal', false)" class="btn-close"></button>
                     </div>
                     <div class="modal-body py-4">
+                        @if($viewingItem->expense)
+                            <div class="card border rounded-3 p-3 mb-4 bg-light border-primary border-opacity-25 shadow-2xs">
+                                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded-3 p-2 me-3 bg-danger bg-opacity-10 text-danger">
+                                            <i class="bi bi-wallet2 fs-4"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark small d-flex align-items-center">
+                                                <span>{{ __('Linked Expense Voucher') }}</span>
+                                                <span class="badge bg-primary ms-2">{{ $viewingItem->expense->reference_no }}</span>
+                                            </div>
+                                            <div class="text-muted small mt-1" style="font-size: 11px;">
+                                                {{ __('Voucher Title:') }} <strong>{{ $viewingItem->expense->title }}</strong> &bull;
+                                                {{ __('Total Amount:') }} <strong class="text-danger">৳{{ number_format($viewingItem->expense->amount, 2) }}</strong> &bull;
+                                                {{ __('Date:') }} {{ $viewingItem->expense->expense_date?->format('d M Y') }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <a href="{{ route('admin.expenses') }}?search={{ $viewingItem->expense->reference_no }}" class="btn btn-sm btn-outline-primary rounded-3 px-3" target="_blank">
+                                        <i class="bi bi-box-arrow-up-right me-1"></i> {{ __('View Expense Voucher') }}
+                                    </a>
+                                </div>
+                            </div>
+                        @endif
+
                         <h6 class="fw-bold text-dark mb-3"><i class="bi bi-signpost-split text-primary me-2"></i>{{ __('Assignments & Withdrawals History') }}</h6>
                         <div class="table-responsive mb-4">
                             <table class="table table-sm table-bordered align-middle">

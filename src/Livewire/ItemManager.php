@@ -293,6 +293,7 @@ class ItemManager extends Component
                         'description'  => "Batch purchase from {$this->supplier}. Serials count: " . count($serials),
                         'amount'       => $totalAmount,
                         'expense_date' => $this->purchase_date ?: now(),
+                        'reference_no' => IspExpense::generateReferenceNo(),
                         'added_by'     => auth()->id(),
                     ]);
                     $expenseId = $expense->id;
@@ -380,6 +381,7 @@ class ItemManager extends Component
                 'description'  => "Purchased from {$this->supplier}. Quantity: {$this->quantity}",
                 'amount'       => $totalAmount,
                 'expense_date' => $this->purchase_date ?: now(),
+                'reference_no' => IspExpense::generateReferenceNo(),
                 'added_by'     => auth()->id(),
             ]);
             $expenseId = $expense->id;

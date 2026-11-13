@@ -83,7 +83,12 @@
                             </div>
                         </div>
                         <h3 class="fw-bold text-dark mb-1">৳ {{ number_format($totalValuation, 2) }}</h3>
-                        <small class="text-muted">{{ __('Across :count active assets', ['count' => $totalItems]) }}</small>
+                        <div class="d-flex justify-content-between align-items-center mt-1">
+                            <small class="text-muted">{{ __('Across :count active assets', ['count' => $totalItems]) }}</small>
+                            <a href="{{ route('admin.expenses') }}?filterCategory=item_purchase" class="text-decoration-none small fw-semibold" style="color:#9333ea; font-size:11px;" title="{{ __('View Equipment Purchase Expenses') }}">
+                                {{ __('Expenses') }} &rarr;
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
