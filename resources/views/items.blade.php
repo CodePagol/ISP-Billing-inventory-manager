@@ -10,6 +10,9 @@
                 <p class="text-muted small mb-0">{{ __('Manage equipment, routers, ONUs, cables, and assignments') }}</p>
             </div>
             <div class="d-flex gap-2">
+                <button wire:click="openCreateCategory" class="btn btn-outline-primary rounded-3 px-3 fw-semibold">
+                    <i class="bi bi-tags me-1"></i> {{ __('Manage Categories') }}
+                </button>
                 <button wire:click="openCreateItem" class="btn btn-primary rounded-3 px-4 fw-semibold shadow-sm">
                     <i class="bi bi-plus-lg me-1"></i> {{ __('Add New Item') }}
                 </button>
@@ -264,7 +267,12 @@
                             <div class="row g-3">
                                 {{-- Category --}}
                                 <div class="col-md-6">
-                                    <label class="form-label small fw-semibold">{{ __('Category') }} <span class="text-danger">*</span></label>
+                                    <div class="d-flex align-items-center justify-content-between mb-1">
+                                        <label class="form-label small fw-semibold mb-0">{{ __('Category') }} <span class="text-danger">*</span></label>
+                                        <button type="button" wire:click="openCreateCategory" class="btn btn-link btn-sm p-0 text-decoration-none fw-bold small text-primary" title="{{ __('Add New Category') }}">
+                                            <i class="bi bi-plus-circle me-1"></i>{{ __('+ Add Category') }}
+                                        </button>
+                                    </div>
                                     <select wire:model.live="category_id" class="form-select rounded-3 @error('category_id') is-invalid @enderror">
                                         <option value="">{{ __('-- Select Category --') }}</option>
                                         @foreach($categories as $cat)
@@ -750,6 +758,163 @@ ONU-2026-0004
                     </div>
                     <div class="modal-footer border-0 pt-0">
                         <button type="button" wire:click="$set('showHistoryModal', false)" class="btn btn-secondary rounded-3 px-4">{{ __('Close') }}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- =========================================================================
+         MODAL: MANAGE & ADD / EDIT CATEGORIES
+         ========================================================================= --}}
+    @if($showCategoryModal)
+        <div class="modal fade show d-block" style="background: rgba(0,0,0,0.65); z-index: 1070;" tabindex="-1">
+            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content border-0 rounded-4 shadow-lg">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold text-dark">
+                            <i class="bi bi-tags me-2 text-primary"></i>
+                            {{ $catEditId ? __('Edit Category') : __('Manage & Add Categories') }}
+                        </h5>
+                        <button type="button" wire:click="closeCategoryModal" class="btn-close"></button>
+                    </div>
+                    <div class="modal-body">
+                        {{-- Create / Edit Form Card --}}
+                        <div class="card border rounded-3 p-3 mb-4 {{ $catEditId ? 'border-warning bg-warning bg-opacity-10' : 'border-primary border-opacity-25 bg-light' }}">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <h6 class="fw-bold mb-0 {{ $catEditId ? 'text-warning text-dark' : 'text-primary' }}">
+                                    <i class="bi {{ $catEditId ? 'bi-pencil-square' : 'bi-plus-circle' }} me-1"></i>
+                                    {{ $catEditId ? __('Edit Category Details') : __('Create New Category') }}
+                                </h6>
+                                @if($catEditId)
+                                    <button type="button" wire:click="openCreateCategory" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-0" style="font-size: 11px;">
+                                        <i class="bi bi-x-circle me-1"></i>{{ __('Cancel Edit') }}
+                                    </button>
+                                @endif
+                            </div>
+
+                            <form wire:submit.prevent="saveCategory">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-semibold">{{ __('Category Name') }} <span class="text-danger">*</span></label>
+                                        <input type="text" wire:model="catName" class="form-control rounded-3 @error('catName') is-invalid @enderror" placeholder="{{ __('e.g. OLT, Server, Splitter, Drop Wire, UPS') }}">
+                                        @error('catName') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-semibold">{{ __('Tracking Method') }} <span class="text-danger">*</span></label>
+                                        <select wire:model.live="catTrackingType" class="form-select rounded-3">
+                                            <option value="serialized">{{ __('Serialized (Individual Serial/MAC - Routers, ONUs, Switches)') }}</option>
+                                            <option value="bulk">{{ __('Bulk Stock (Quantity/Meters - Fiber cables, RJ45)') }}</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-semibold">{{ __('Default Unit of Measurement') }} <span class="text-danger">*</span></label>
+                                        <input type="text" wire:model="catUnit" class="form-control rounded-3 @error('catUnit') is-invalid @enderror" placeholder="{{ __('e.g. pcs, meter, roll, box, packet, set') }}">
+                                        <div class="d-flex flex-wrap gap-1 mt-1">
+                                            @foreach(['pcs', 'meter', 'roll', 'box', 'packet', 'set', 'feet', 'bundle'] as $pUnit)
+                                                <button type="button" wire:click="setCatUnit('{{ $pUnit }}')" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-0" style="font-size: 10px;">
+                                                    {{ $pUnit }}
+                                                </button>
+                                            @endforeach
+                                        </div>
+                                        @error('catUnit') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-semibold">{{ __('Icon (Bootstrap Icon)') }}</label>
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text bg-white"><i class="bi {{ $catIcon ?: 'bi-box-seam' }} text-primary fs-6"></i></span>
+                                            <input type="text" wire:model="catIcon" class="form-control" placeholder="{{ __('e.g. bi-router') }}">
+                                        </div>
+                                        <div class="d-flex flex-wrap gap-1 mt-1">
+                                            @foreach(['bi-box-seam', 'bi-hdd-network', 'bi-router', 'bi-hdd-rack', 'bi-server', 'bi-diagram-3', 'bi-cpu', 'bi-plug', 'bi-bezier2', 'bi-tools', 'bi-battery-charging', 'bi-camera-video', 'bi-lightning-charge', 'bi-tag'] as $pIcon)
+                                                <button type="button" wire:click="setCatIcon('{{ $pIcon }}')" class="btn btn-xs {{ $catIcon === $pIcon ? 'btn-primary' : 'btn-light border' }} rounded-2 p-1 px-2" title="{{ $pIcon }}">
+                                                    <i class="bi {{ $pIcon }}"></i>
+                                                </button>
+                                            @endforeach
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label class="form-label small fw-semibold">{{ __('Description (Optional)') }}</label>
+                                        <input type="text" wire:model="catDescription" class="form-control rounded-3" placeholder="{{ __('Short notes or description for this category...') }}">
+                                    </div>
+
+                                    <div class="col-12 d-flex justify-content-end gap-2 pt-1">
+                                        <button type="button" wire:click="closeCategoryModal" class="btn btn-sm btn-light rounded-3 px-3">{{ __('Cancel') }}</button>
+                                        <button type="submit" class="btn btn-sm btn-primary rounded-3 px-4 fw-semibold">
+                                            <i class="bi bi-check-lg me-1"></i> {{ $catEditId ? __('Update Category') : __('Save Category') }}
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        {{-- Existing Categories List --}}
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <h6 class="fw-bold mb-0 text-dark">
+                                <i class="bi bi-list-check me-1 text-primary"></i> {{ __('Current Categories') }} ({{ count($categories) }})
+                            </h6>
+                            <a href="{{ route('admin.inventory.categories') }}" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-1 text-decoration-none" style="font-size: 11px;">
+                                <i class="bi bi-box-arrow-up-right me-1"></i>{{ __('Open Full Category Manager') }}
+                            </a>
+                        </div>
+                        <div class="table-responsive border rounded-3">
+                            <table class="table table-sm table-hover align-middle mb-0" style="font-size: 12px;">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>{{ __('Category') }}</th>
+                                        <th>{{ __('Tracking') }}</th>
+                                        <th>{{ __('Unit') }}</th>
+                                        <th>{{ __('Items Count') }}</th>
+                                        <th class="text-end">{{ __('Actions') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($categories as $cat)
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="rounded-2 p-1 me-2 bg-light border text-primary d-flex align-items-center justify-content-center" style="width: 26px; height: 26px;">
+                                                        <i class="bi {{ $cat->icon ?? 'bi-box-seam' }}"></i>
+                                                    </div>
+                                                    <div>
+                                                        <span class="fw-bold text-dark">{{ $cat->name }}</span>
+                                                        <small class="text-muted d-block" style="font-size: 10px;">{{ $cat->slug }}</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge {{ $cat->tracking_type === 'serialized' ? 'bg-primary' : 'bg-success' }} bg-opacity-15 text-{{ $cat->tracking_type === 'serialized' ? 'primary' : 'success' }} rounded-pill">
+                                                    {{ ucfirst($cat->tracking_type) }}
+                                                </span>
+                                            </td>
+                                            <td><span class="badge bg-light text-dark border">{{ $cat->unit }}</span></td>
+                                            <td><span class="fw-bold">{{ $cat->items_count }}</span></td>
+                                            <td class="text-end">
+                                                <button type="button" wire:click="openEditCategory({{ $cat->id }})" class="btn btn-xs btn-outline-secondary rounded-2 px-2 py-1" title="{{ __('Edit Category') }}">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                @if($cat->items_count == 0)
+                                                    <button type="button" wire:confirm="{{ __('Are you sure you want to delete this category?') }}" wire:click="deleteCategory({{ $cat->id }})" class="btn btn-xs btn-outline-danger rounded-2 px-2 py-1" title="{{ __('Delete Category') }}">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                @else
+                                                    <button type="button" class="btn btn-xs btn-outline-secondary rounded-2 px-2 py-1 opacity-50" disabled title="{{ __('Cannot delete category with items') }}">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" wire:click="closeCategoryModal" class="btn btn-secondary rounded-3 px-4">{{ __('Close') }}</button>
                     </div>
                 </div>
             </div>

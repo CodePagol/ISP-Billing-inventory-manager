@@ -7,6 +7,7 @@ use App\Support\Hooks;
 use Filament\Navigation\NavigationItem;
 use Illuminate\Foundation\Application;
 use Livewire\Livewire;
+use Plugins\InventoryManager\Livewire\CategoryManager;
 use Plugins\InventoryManager\Livewire\InventoryDashboard;
 use Plugins\InventoryManager\Livewire\ItemManager;
 use Plugins\InventoryManager\Livewire\StockMovementManager;
@@ -55,10 +56,12 @@ class Plugin extends AbstractPlugin
         if (class_exists(Livewire::class)) {
             Livewire::component('inventory-dashboard', InventoryDashboard::class);
             Livewire::component('inventory-items', ItemManager::class);
+            Livewire::component('inventory-categories', CategoryManager::class);
             Livewire::component('inventory-movements', StockMovementManager::class);
 
             Livewire::component('inventory.dashboard', InventoryDashboard::class);
             Livewire::component('inventory.items', ItemManager::class);
+            Livewire::component('inventory.categories', CategoryManager::class);
             Livewire::component('inventory.movements', StockMovementManager::class);
         }
     }
@@ -103,6 +106,11 @@ class Plugin extends AbstractPlugin
                         'title' => 'Item Catalog & Stock',
                         'route' => 'admin.inventory.items',
                         'icon'  => 'bi bi-box-seam',
+                    ],
+                    [
+                        'title' => 'Categories',
+                        'route' => 'admin.inventory.categories',
+                        'icon'  => 'bi bi-tags',
                     ],
                     [
                         'title' => 'Deploy & Withdrawals',

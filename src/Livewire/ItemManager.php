@@ -8,6 +8,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Plugins\InventoryManager\Models\InventoryAssignment;
@@ -29,10 +30,19 @@ class ItemManager extends Component
 
     // Modals visibility
     public bool $showItemModal = false;
+    public bool $showCategoryModal = false;
     public bool $showDeployModal = false;
     public bool $showDamageModal = false;
     public bool $showReturnModal = false;
     public bool $showHistoryModal = false;
+
+    // Category Management Form
+    public ?int $catEditId = null;
+    public string $catName = '';
+    public string $catTrackingType = 'serialized';
+    public string $catUnit = 'pcs';
+    public string $catIcon = 'bi-box-seam';
+    public string $catDescription = '';
 
     // Item Form
     public ?int $editItemId = null;
@@ -424,6 +434,120 @@ class ItemManager extends Component
         $this->showItemModal = false;
     }
 
+    // ── Category Management ──────────────────────────────────────────────────
+
+    public function openCreateCategory(): void
+    {
+        $this->resetValidation();
+        $this->catEditId       = null;
+        $this->catName         = '';
+        $this->catTrackingType = 'serialized';
+        $this->catUnit         = 'pcs';
+        $this->catIcon         = 'bi-box-seam';
+        $this->catDescription  = '';
+        $this->showCategoryModal = true;
+    }
+
+    public function openEditCategory(int $id): void
+    {
+        $this->resetValidation();
+        $cat = InventoryCategory::findOrFail($id);
+        $this->catEditId       = $cat->id;
+        $this->catName         = $cat->name;
+        $this->catTrackingType = $cat->tracking_type;
+        $this->catUnit         = $cat->unit;
+        $this->catIcon         = $cat->icon ?? 'bi-box-seam';
+        $this->catDescription  = $cat->description ?? '';
+        $this->showCategoryModal = true;
+    }
+
+    public function closeCategoryModal(): void
+    {
+        $this->showCategoryModal = false;
+        $this->catEditId = null;
+    }
+
+    public function setCatUnit(string $unit): void
+    {
+        $this->catUnit = $unit;
+    }
+
+    public function setCatIcon(string $icon): void
+    {
+        $this->catIcon = $icon;
+    }
+
+    public function saveCategory(): void
+    {
+        abortIfNoAccess(['Super Admin', 'Admin', 'Accountant'], ['site-setup', 'manage-expenses']);
+
+        $this->validate([
+            'catName'         => 'required|string|min:2|max:100',
+            'catTrackingType' => 'required|in:serialized,bulk',
+            'catUnit'         => 'required|string|max:30',
+            'catIcon'         => 'nullable|string|max:50',
+            'catDescription'  => 'nullable|string|max:500',
+        ]);
+
+        $baseSlug = Str::slug($this->catName);
+        if (empty($baseSlug)) {
+            $baseSlug = 'category-' . time();
+        }
+
+        $slug = $baseSlug;
+        $counter = 1;
+        while (InventoryCategory::where('slug', $slug)
+            ->when($this->catEditId, fn($q) => $q->where('id', '!=', $this->catEditId))
+            ->exists()) {
+            $slug = "{$baseSlug}-" . (++$counter);
+        }
+
+        $data = [
+            'name'          => trim($this->catName),
+            'slug'          => $slug,
+            'tracking_type' => $this->catTrackingType,
+            'unit'          => trim($this->catUnit) ?: 'pcs',
+            'icon'          => trim($this->catIcon) ?: 'bi-box-seam',
+            'description'   => trim($this->catDescription) ?: null,
+        ];
+
+        if ($this->catEditId) {
+            $cat = InventoryCategory::findOrFail($this->catEditId);
+            $cat->update($data);
+            flash()->success(__('Category updated successfully.'));
+        } else {
+            $cat = InventoryCategory::create($data);
+            $this->category_id   = $cat->id;
+            $this->tracking_type = $cat->tracking_type;
+            if ($this->tracking_type === 'serialized') {
+                $this->quantity = 1;
+            }
+            flash()->success(__('Category [:name] created and selected.', ['name' => $cat->name]));
+        }
+
+        $this->showCategoryModal = false;
+        $this->catEditId = null;
+    }
+
+    public function deleteCategory(int $id): void
+    {
+        abortIfNoAccess(['Super Admin', 'Admin', 'Accountant'], ['site-setup', 'manage-expenses']);
+
+        $cat = InventoryCategory::findOrFail($id);
+
+        if ($cat->items()->exists()) {
+            flash()->error(__('Cannot delete category because it has active inventory items.'));
+            return;
+        }
+
+        $name = $cat->name;
+        if ($this->category_id === $cat->id) {
+            $this->category_id = null;
+        }
+        $cat->delete();
+        flash()->success(__('Category [:name] deleted successfully.', ['name' => $name]));
+    }
+
     // ── Deploy / Withdraw ────────────────────────────────────────────────────
 
     public function openDeploy(int $itemId): void
@@ -764,7 +888,7 @@ class ItemManager extends Component
         }
 
         $items = $query->paginate(15);
-        $categories = InventoryCategory::orderBy('name')->get();
+        $categories = InventoryCategory::withCount('items')->orderBy('name')->get();
         $recentExpenses = IspExpense::where('category', 'item_purchase')->latest()->take(25)->get();
         $technicians = User::orderBy('name')->get(['id', 'name']);
 

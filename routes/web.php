@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Plugins\InventoryManager\Livewire\CategoryManager;
 use Plugins\InventoryManager\Livewire\InventoryDashboard;
 use Plugins\InventoryManager\Livewire\ItemManager;
 use Plugins\InventoryManager\Livewire\StockMovementManager;
@@ -11,5 +12,6 @@ Route::middleware(['auth', 'verified', 'admin'])
     ->group(function () {
         Route::get('/', InventoryDashboard::class)->name('dashboard');
         Route::get('/items', ItemManager::class)->name('items');
+        Route::get('/categories', CategoryManager::class)->name('categories');
         Route::get('/movements', StockMovementManager::class)->name('movements');
     });

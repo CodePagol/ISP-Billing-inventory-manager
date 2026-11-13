@@ -95,9 +95,14 @@
                 <h6 class="fw-bold mb-0 text-dark">
                     <i class="bi bi-grid me-2 text-primary"></i>{{ __('Category-wise Stock Breakdown') }}
                 </h6>
-                <a href="{{ route('admin.inventory.items') }}" class="btn btn-sm btn-light rounded-pill px-3">
-                    {{ __('View All Items') }} &rarr;
-                </a>
+                <div class="d-flex gap-2">
+                    <a href="{{ route('admin.inventory.categories') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                        <i class="bi bi-tags me-1"></i>{{ __('Manage Categories') }}
+                    </a>
+                    <a href="{{ route('admin.inventory.items') }}" class="btn btn-sm btn-light rounded-pill px-3">
+                        {{ __('View All Items') }} &rarr;
+                    </a>
+                </div>
             </div>
             <div class="card-body pt-0">
                 <div class="row g-3">
