@@ -59,17 +59,23 @@
                             <div>
                                 <div class="d-flex align-items-start justify-content-between mb-2">
                                     <div class="d-flex align-items-center">
-                                        <div class="rounded-3 p-2 me-2 d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary" style="width: 38px; height: 38px;">
-                                            <i class="bi {{ $cat->icon ?? 'bi-box-seam' }} fs-5"></i>
+                                        <div class="rounded-3 p-2 me-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background: rgba(37, 99, 235, 0.12) !important;">
+                                            <i class="bi {{ $cat->icon ?? 'bi-box-seam' }} fs-5" style="color: #2563eb !important;"></i>
                                         </div>
                                         <div>
                                             <h6 class="fw-bold mb-0 text-dark">{{ $cat->name }}</h6>
                                             <span class="badge bg-light text-muted border text-uppercase" style="font-size: 9px;">{{ $cat->slug }}</span>
                                         </div>
                                     </div>
-                                    <span class="badge {{ $cat->tracking_type === 'serialized' ? 'bg-primary' : 'bg-success' }} bg-opacity-15 text-{{ $cat->tracking_type === 'serialized' ? 'primary' : 'success' }} fw-semibold rounded-pill px-2 py-1 small">
-                                        {{ ucfirst($cat->tracking_type) }}
-                                    </span>
+                                    @if($cat->tracking_type === 'serialized')
+                                        <span class="badge rounded-pill fw-semibold border" style="background: rgba(37, 99, 235, 0.1) !important; color: #1d4ed8 !important; border-color: rgba(37, 99, 235, 0.25) !important; font-size: 9.5px; padding: 3px 8px;">
+                                            {{ __('Serialized') }}
+                                        </span>
+                                    @else
+                                        <span class="badge rounded-pill fw-semibold border" style="background: rgba(22, 163, 74, 0.1) !important; color: #15803d !important; border-color: rgba(22, 163, 74, 0.25) !important; font-size: 9.5px; padding: 3px 8px;">
+                                            {{ __('Bulk') }}
+                                        </span>
+                                    @endif
                                 </div>
 
                                 @if($cat->description)

@@ -30,8 +30,8 @@
                     <div class="card-body p-3">
                         <div class="d-flex align-items-center justify-content-between mb-2">
                             <span class="text-muted small fw-semibold text-uppercase">{{ __('Available In Stock') }}</span>
-                            <div class="rounded-3 p-2 bg-success bg-opacity-10 text-success">
-                                <i class="bi bi-check-circle fs-5"></i>
+                            <div class="rounded-3 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; background: rgba(22, 163, 74, 0.12) !important;">
+                                <i class="bi bi-check-circle-fill fs-5" style="color: #16a34a !important;"></i>
                             </div>
                         </div>
                         <h3 class="fw-bold text-success mb-1">{{ number_format($inStockCount) }}</h3>
@@ -46,8 +46,8 @@
                     <div class="card-body p-3">
                         <div class="d-flex align-items-center justify-content-between mb-2">
                             <span class="text-muted small fw-semibold text-uppercase">{{ __('Deployed / In Use') }}</span>
-                            <div class="rounded-3 p-2 bg-primary bg-opacity-10 text-primary">
-                                <i class="bi bi-send-check fs-5"></i>
+                            <div class="rounded-3 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; background: rgba(37, 99, 235, 0.12) !important;">
+                                <i class="bi bi-send-check-fill fs-5" style="color: #2563eb !important;"></i>
                             </div>
                         </div>
                         <h3 class="fw-bold text-primary mb-1">{{ number_format($deployedCount) }}</h3>
@@ -62,8 +62,8 @@
                     <div class="card-body p-3">
                         <div class="d-flex align-items-center justify-content-between mb-2">
                             <span class="text-muted small fw-semibold text-uppercase">{{ __('Damaged / Faulty') }}</span>
-                            <div class="rounded-3 p-2 bg-danger bg-opacity-10 text-danger">
-                                <i class="bi bi-exclamation-triangle fs-5"></i>
+                            <div class="rounded-3 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; background: rgba(220, 38, 38, 0.12) !important;">
+                                <i class="bi bi-exclamation-triangle-fill fs-5" style="color: #dc2626 !important;"></i>
                             </div>
                         </div>
                         <h3 class="fw-bold text-danger mb-1">{{ number_format($damagedCount) }}</h3>
@@ -78,8 +78,8 @@
                     <div class="card-body p-3">
                         <div class="d-flex align-items-center justify-content-between mb-2">
                             <span class="text-muted small fw-semibold text-uppercase">{{ __('Total Valuation') }}</span>
-                            <div class="rounded-3 p-2 bg-purple bg-opacity-10 text-purple" style="color:#9333ea;">
-                                <i class="bi bi-cash-stack fs-5"></i>
+                            <div class="rounded-3 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; background: rgba(147, 51, 234, 0.12) !important;">
+                                <i class="bi bi-cash-stack fs-5" style="color: #9333ea !important;"></i>
                             </div>
                         </div>
                         <h3 class="fw-bold text-dark mb-1">৳ {{ number_format($totalValuation, 2) }}</h3>
@@ -96,10 +96,20 @@
 
         {{-- Categories Stock Overview --}}
         <div class="card border-0 shadow-sm rounded-4 mb-4">
-            <div class="card-header bg-white border-0 py-3 d-flex align-items-center justify-content-between">
-                <h6 class="fw-bold mb-0 text-dark">
-                    <i class="bi bi-grid me-2 text-primary"></i>{{ __('Category-wise Stock Breakdown') }}
-                </h6>
+            <div class="card-header bg-white border-0 py-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <div class="d-flex align-items-center gap-3">
+                    <h6 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-grid me-2 text-primary"></i>{{ __('Category-wise Stock Breakdown') }}
+                    </h6>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" wire:click="$set('stockFilter', 'active')" class="btn {{ $stockFilter === 'active' ? 'btn-primary' : 'btn-outline-secondary' }} rounded-start-pill px-3" style="font-size: 11.5px;">
+                            <i class="bi bi-funnel me-1"></i>{{ __('Active Stock') }} ({{ $activeCategoriesCount }})
+                        </button>
+                        <button type="button" wire:click="$set('stockFilter', 'all')" class="btn {{ $stockFilter === 'all' ? 'btn-primary' : 'btn-outline-secondary' }} rounded-end-pill px-3" style="font-size: 11.5px;">
+                            {{ __('All Categories') }} ({{ $totalCategoriesCount }})
+                        </button>
+                    </div>
+                </div>
                 <div class="d-flex gap-2">
                     <a href="{{ route('admin.inventory.categories') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
                         <i class="bi bi-tags me-1"></i>{{ __('Manage Categories') }}
@@ -113,62 +123,83 @@
                 <div class="row g-3">
                     @forelse($categories as $cat)
                         <div class="col-md-4 col-lg-3">
-                            <div class="p-3 rounded-4 border {{ $cat->total_qty > 0 ? 'bg-white shadow-sm border-primary border-opacity-25' : 'bg-light bg-opacity-50' }} h-100 d-flex flex-column justify-content-between">
+                            <div class="p-3 rounded-4 border {{ $cat->total_qty > 0 ? 'bg-white shadow-sm border-primary border-opacity-25' : 'bg-light bg-opacity-40' }} h-100 d-flex flex-column justify-content-between">
                                 <div>
                                     <div class="d-flex align-items-center justify-content-between mb-2">
                                         <span class="fw-bold text-dark text-truncate" title="{{ $cat->name }}">
                                             <i class="bi {{ $cat->icon ?? 'bi-box-seam' }} text-primary me-1"></i> {{ $cat->name }}
                                         </span>
-                                        <span class="badge {{ $cat->tracking_type === 'serialized' ? 'bg-primary' : 'bg-success' }} bg-opacity-15 text-{{ $cat->tracking_type === 'serialized' ? 'primary' : 'success' }} rounded-pill small">
-                                            {{ ucfirst($cat->tracking_type) }}
-                                        </span>
+                                        @if($cat->tracking_type === 'serialized')
+                                            <span class="badge rounded-pill fw-semibold border" style="background: rgba(37, 99, 235, 0.1) !important; color: #1d4ed8 !important; border-color: rgba(37, 99, 235, 0.25) !important; font-size: 9.5px; padding: 3px 8px;">
+                                                {{ __('Serialized') }}
+                                            </span>
+                                        @else
+                                            <span class="badge rounded-pill fw-semibold border" style="background: rgba(22, 163, 74, 0.1) !important; color: #15803d !important; border-color: rgba(22, 163, 74, 0.25) !important; font-size: 9.5px; padding: 3px 8px;">
+                                                {{ __('Bulk') }}
+                                            </span>
+                                        @endif
                                     </div>
 
                                     {{-- Total Stock Pill --}}
                                     <div class="d-flex justify-content-between align-items-center bg-light rounded-3 px-2 py-1 mb-2 small">
                                         <span class="text-muted fw-semibold">{{ __('Total Stock:') }}</span>
-                                        <span class="fw-bold text-dark">{{ $cat->total_qty }} {{ $cat->unit }}</span>
+                                        <span class="fw-bold {{ $cat->total_qty > 0 ? 'text-dark' : 'text-muted' }}">{{ $cat->total_qty }} {{ $cat->unit }}</span>
                                     </div>
 
-                                    {{-- Status Breakdown --}}
-                                    <div class="d-flex justify-content-between text-muted small mb-1">
-                                        <span>{{ __('In Stock:') }}</span>
-                                        <span class="fw-bold text-success">{{ $cat->in_stock_qty }} {{ $cat->unit }}</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between text-muted small mb-1">
-                                        <span>{{ __('Deployed:') }}</span>
-                                        <span class="fw-bold text-primary">{{ $cat->deployed_qty }} {{ $cat->unit }}</span>
-                                    </div>
-                                    @if($cat->under_repair_qty > 0)
+                                    @if($cat->total_qty > 0)
+                                        {{-- Status Breakdown --}}
                                         <div class="d-flex justify-content-between text-muted small mb-1">
-                                            <span>{{ __('Under Repair:') }}</span>
-                                            <span class="fw-bold text-warning">{{ $cat->under_repair_qty }} {{ $cat->unit }}</span>
+                                            <span>{{ __('In Stock:') }}</span>
+                                            <span class="fw-bold text-success">{{ $cat->in_stock_qty }} {{ $cat->unit }}</span>
                                         </div>
-                                    @endif
-                                    @if($cat->damaged_qty > 0)
                                         <div class="d-flex justify-content-between text-muted small mb-1">
-                                            <span>{{ __('Damaged:') }}</span>
-                                            <span class="fw-bold text-danger">{{ $cat->damaged_qty }} {{ $cat->unit }}</span>
+                                            <span>{{ __('Deployed:') }}</span>
+                                            <span class="fw-bold text-primary">{{ $cat->deployed_qty }} {{ $cat->unit }}</span>
                                         </div>
-                                    @endif
-                                    @if($cat->retired_qty > 0)
-                                        <div class="d-flex justify-content-between text-muted small mb-1">
-                                            <span>{{ __('Retired:') }}</span>
-                                            <span class="fw-bold text-secondary">{{ $cat->retired_qty }} {{ $cat->unit }}</span>
+                                        @if($cat->under_repair_qty > 0)
+                                            <div class="d-flex justify-content-between text-muted small mb-1">
+                                                <span>{{ __('Under Repair:') }}</span>
+                                                <span class="fw-bold text-warning">{{ $cat->under_repair_qty }} {{ $cat->unit }}</span>
+                                            </div>
+                                        @endif
+                                        @if($cat->damaged_qty > 0)
+                                            <div class="d-flex justify-content-between text-muted small mb-1">
+                                                <span>{{ __('Damaged:') }}</span>
+                                                <span class="fw-bold text-danger">{{ $cat->damaged_qty }} {{ $cat->unit }}</span>
+                                            </div>
+                                        @endif
+                                        @if($cat->retired_qty > 0)
+                                            <div class="d-flex justify-content-between text-muted small mb-1">
+                                                <span>{{ __('Retired:') }}</span>
+                                                <span class="fw-bold text-secondary">{{ $cat->retired_qty }} {{ $cat->unit }}</span>
+                                            </div>
+                                        @endif
+                                    @else
+                                        {{-- Empty category subtle info --}}
+                                        <div class="text-center py-2 text-muted small">
+                                            <small class="opacity-75">{{ __('No equipment recorded') }}</small>
                                         </div>
                                     @endif
                                 </div>
 
-                                @if($cat->total_qty > 0)
-                                    <div class="pt-2 mt-2 border-top text-end">
+                                <div class="pt-2 mt-2 border-top text-end">
+                                    @if($cat->total_qty > 0)
                                         <a href="{{ route('admin.inventory.items') }}?filterCategory={{ $cat->id }}" class="text-decoration-none small text-primary fw-semibold" style="font-size: 11px;">
                                             {{ __('View Items') }} &rarr;
                                         </a>
-                                    </div>
-                                @endif
+                                    @else
+                                        <a href="{{ route('admin.inventory.items') }}" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-0 text-muted" style="font-size: 10px;">
+                                            <i class="bi bi-plus-lg me-1"></i>{{ __('Add Item') }}
+                                        </a>
+                                    @endif
+                                </div>
                             </div>
                         </div>
                     @empty
+                        <div class="col-12 py-3 text-center text-muted">
+                            {{ __('No categories found matching your filter.') }}
+                        </div>
+                    @endforelse
                         <div class="col-12 py-3 text-center text-muted">
                             {{ __('No categories found.') }}
                         </div>

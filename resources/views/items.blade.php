@@ -913,9 +913,15 @@ ONU-2026-0004
                                                 </div>
                                             </td>
                                             <td>
-                                                <span class="badge {{ $cat->tracking_type === 'serialized' ? 'bg-primary' : 'bg-success' }} bg-opacity-15 text-{{ $cat->tracking_type === 'serialized' ? 'primary' : 'success' }} rounded-pill">
-                                                    {{ ucfirst($cat->tracking_type) }}
-                                                </span>
+                                                @if($cat->tracking_type === 'serialized')
+                                                    <span class="badge rounded-pill fw-semibold border" style="background: rgba(37, 99, 235, 0.1) !important; color: #1d4ed8 !important; border-color: rgba(37, 99, 235, 0.25) !important; font-size: 9.5px; padding: 2px 7px;">
+                                                        {{ __('Serialized') }}
+                                                    </span>
+                                                @else
+                                                    <span class="badge rounded-pill fw-semibold border" style="background: rgba(22, 163, 74, 0.1) !important; color: #15803d !important; border-color: rgba(22, 163, 74, 0.25) !important; font-size: 9.5px; padding: 2px 7px;">
+                                                        {{ __('Bulk') }}
+                                                    </span>
+                                                @endif
                                             </td>
                                             <td><span class="badge bg-light text-dark border">{{ $cat->unit }}</span></td>
                                             <td><span class="fw-bold">{{ $cat->items_count }}</span></td>

@@ -10,6 +10,8 @@ use Plugins\InventoryManager\Models\InventoryStockLog;
 
 class InventoryDashboard extends Component
 {
+    public string $stockFilter = 'all'; // 'all' or 'active'
+
     public function render()
     {
         abortIfNoAccess(['Super Admin', 'Admin', 'Accountant'], ['site-setup', 'manage-expenses']);
@@ -86,16 +88,25 @@ class InventoryDashboard extends Component
             ->take(5)
             ->get();
 
+        $activeCategoriesCount = $categories->where('total_qty', '>', 0)->count();
+        $totalCategoriesCount = $categories->count();
+
+        $displayCategories = $this->stockFilter === 'active'
+            ? $categories->where('total_qty', '>', 0)
+            : $categories;
+
         return view('inventory-manager::dashboard', [
-            'totalItems'        => $totalItems,
-            'inStockCount'      => (float) $inStockCount,
-            'deployedCount'     => (float) $deployedCount,
-            'damagedCount'      => (float) $damagedCount,
-            'underRepairCount'  => (float) $underRepairCount,
-            'totalValuation'    => (float) $totalValuation,
-            'categories'        => $categories,
-            'recentAssignments' => $recentAssignments,
-            'recentDamaged'     => $recentDamaged,
+            'totalItems'             => $totalItems,
+            'inStockCount'           => (float) $inStockCount,
+            'deployedCount'          => (float) $deployedCount,
+            'damagedCount'           => (float) $damagedCount,
+            'underRepairCount'       => (float) $underRepairCount,
+            'totalValuation'         => (float) $totalValuation,
+            'categories'             => $displayCategories,
+            'activeCategoriesCount'  => $activeCategoriesCount,
+            'totalCategoriesCount'   => $totalCategoriesCount,
+            'recentAssignments'      => $recentAssignments,
+            'recentDamaged'          => $recentDamaged,
         ])->layout('layouts.app');
     }
 }
