@@ -7,6 +7,7 @@
     "author_url": "https://codepagol.com",
     "requires_core": "1.0.0",
     "requires_license": false,
+    "repository": "https://github.com/CodePagol/ISP-Billing-inventory-manager",
     "class": "Plugins\\InventoryManager\\Plugin",
     "tags": [
         "inventory",
