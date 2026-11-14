@@ -154,91 +154,89 @@
          MODAL: ADD / EDIT CATEGORY
          ========================================================================= --}}
     @if($showModal)
-        <div class="modal fade show d-block" style="background: rgba(0,0,0,0.5);" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content border-0 rounded-4 shadow-lg">
-                    <div class="modal-header border-0 pb-0">
-                        <h5 class="modal-title fw-bold text-dark">
+        <div class="modal fade show d-block" style="background: rgba(0,0,0,0.5); z-index: 1055;" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <form wire:submit.prevent="save" class="modal-content border-0 rounded-4 shadow-lg overflow-hidden d-flex flex-column" style="max-height: calc(100vh - 2rem); max-height: calc(100dvh - 2rem);">
+                    <div class="modal-header border-bottom py-3 px-3 px-md-4 bg-light flex-shrink-0">
+                        <h5 class="modal-title fw-bold text-dark mb-0">
                             <i class="bi bi-tags me-2 text-primary"></i>
                             {{ $editCategoryId ? __('Edit Category') : __('Add New Category') }}
                         </h5>
                         <button type="button" wire:click="closeModal" class="btn-close"></button>
                     </div>
-                    <form wire:submit.prevent="save">
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label class="form-label small fw-semibold">{{ __('Category Name') }} <span class="text-danger">*</span></label>
-                                <input type="text" wire:model="name" class="form-control rounded-3 @error('name') is-invalid @enderror" placeholder="{{ __('e.g. OLT, Server, Splitter, Drop Wire, UPS') }}" autofocus>
-                                @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
+                    <div class="modal-body p-3 p-md-4 overflow-y-auto flex-grow-1" style="min-height: 0;">
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">{{ __('Category Name') }} <span class="text-danger">*</span></label>
+                            <input type="text" wire:model="name" class="form-control rounded-3 @error('name') is-invalid @enderror" placeholder="{{ __('e.g. OLT, Server, Splitter, Drop Wire, UPS') }}" autofocus>
+                            @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
 
-                            <div class="mb-3">
-                                <label class="form-label small fw-semibold">{{ __('Tracking Method') }} <span class="text-danger">*</span></label>
-                                <div class="row g-2">
-                                    <div class="col-6">
-                                        <div class="rounded-3 p-2 text-center" style="cursor: pointer; {{ $tracking_type === 'serialized' ? 'background: rgba(44, 123, 229, 0.08) !important; border: 1.5px solid #2c7be5 !important;' : 'background: #f8fafc !important; border: 1px solid #cbd5e1 !important;' }}" wire:click="$set('tracking_type', 'serialized')">
-                                            <input type="radio" wire:model="tracking_type" value="serialized" id="track_ser" class="form-check-input me-1">
-                                            <label for="track_ser" class="small fw-bold mb-0 d-block cursor-pointer text-dark">{{ __('Serialized') }}</label>
-                                            <small class="text-muted d-block" style="font-size: 10px;">{{ __('Routers, ONUs, S/N, MAC') }}</small>
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <div class="rounded-3 p-2 text-center" style="cursor: pointer; {{ $tracking_type === 'bulk' ? 'background: rgba(44, 123, 229, 0.08) !important; border: 1.5px solid #2c7be5 !important;' : 'background: #f8fafc !important; border: 1px solid #cbd5e1 !important;' }}" wire:click="$set('tracking_type', 'bulk')">
-                                            <input type="radio" wire:model="tracking_type" value="bulk" id="track_bulk" class="form-check-input me-1">
-                                            <label for="track_bulk" class="small fw-bold mb-0 d-block cursor-pointer text-dark">{{ __('Bulk Stock') }}</label>
-                                            <small class="text-muted d-block" style="font-size: 10px;">{{ __('Cables, RJ45, Quantity/Meters') }}</small>
-                                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">{{ __('Tracking Method') }} <span class="text-danger">*</span></label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <div class="rounded-3 p-2 text-center" style="cursor: pointer; {{ $tracking_type === 'serialized' ? 'background: rgba(44, 123, 229, 0.08) !important; border: 1.5px solid #2c7be5 !important;' : 'background: #f8fafc !important; border: 1px solid #cbd5e1 !important;' }}" wire:click="$set('tracking_type', 'serialized')">
+                                        <input type="radio" wire:model="tracking_type" value="serialized" id="track_ser" class="form-check-input me-1">
+                                        <label for="track_ser" class="small fw-bold mb-0 d-block cursor-pointer text-dark">{{ __('Serialized') }}</label>
+                                        <small class="text-muted d-block" style="font-size: 10px;">{{ __('Routers, ONUs, S/N, MAC') }}</small>
                                     </div>
                                 </div>
-                                @error('tracking_type') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label small fw-semibold">{{ __('Default Unit of Measurement') }} <span class="text-danger">*</span></label>
-                                <input type="text" wire:model="unit" class="form-control rounded-3 @error('unit') is-invalid @enderror" placeholder="{{ __('e.g. pcs, meter, box, packet, roll, set') }}">
-                                <div class="d-flex flex-wrap gap-1 mt-1">
-                                    @foreach(['pcs', 'meter', 'roll', 'box', 'packet', 'set', 'feet', 'bundle'] as $presetUnit)
-                                        <button type="button" wire:click="setUnit('{{ $presetUnit }}')" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-0" style="font-size: 10.5px;">
-                                            {{ $presetUnit }}
-                                        </button>
-                                    @endforeach
-                                </div>
-                                @error('unit') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label small fw-semibold">{{ __('Icon (Bootstrap Icon)') }}</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light"><i class="bi {{ $icon ?: 'bi-box-seam' }} fs-5"></i></span>
-                                    <input type="text" wire:model="icon" class="form-control rounded-end-3" placeholder="{{ __('e.g. bi-router, bi-hdd-network') }}">
-                                </div>
-                                <div class="d-flex flex-wrap gap-1 mt-2">
-                                    @foreach([
-                                        'bi-box-seam', 'bi-hdd-network', 'bi-router', 'bi-hdd-rack', 'bi-server',
-                                        'bi-diagram-3', 'bi-cpu', 'bi-plug', 'bi-bezier2', 'bi-tools',
-                                        'bi-battery-charging', 'bi-camera-video', 'bi-lightning-charge',
-                                        'bi-broadcast-pin', 'bi-shield-check', 'bi-tag'
-                                    ] as $presetIcon)
-                                        <button type="button" wire:click="setIcon('{{ $presetIcon }}')" class="btn btn-sm {{ $icon === $presetIcon ? 'btn-primary' : 'btn-light border' }} rounded-3 p-1 px-2" title="{{ $presetIcon }}">
-                                            <i class="bi {{ $presetIcon }}"></i>
-                                        </button>
-                                    @endforeach
+                                <div class="col-6">
+                                    <div class="rounded-3 p-2 text-center" style="cursor: pointer; {{ $tracking_type === 'bulk' ? 'background: rgba(44, 123, 229, 0.08) !important; border: 1.5px solid #2c7be5 !important;' : 'background: #f8fafc !important; border: 1px solid #cbd5e1 !important;' }}" wire:click="$set('tracking_type', 'bulk')">
+                                        <input type="radio" wire:model="tracking_type" value="bulk" id="track_bulk" class="form-check-input me-1">
+                                        <label for="track_bulk" class="small fw-bold mb-0 d-block cursor-pointer text-dark">{{ __('Bulk Stock') }}</label>
+                                        <small class="text-muted d-block" style="font-size: 10px;">{{ __('Cables, RJ45, Quantity/Meters') }}</small>
+                                    </div>
                                 </div>
                             </div>
+                            @error('tracking_type') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                        </div>
 
-                            <div class="mb-2">
-                                <label class="form-label small fw-semibold">{{ __('Description (Optional)') }}</label>
-                                <textarea wire:model="description" rows="2" class="form-control rounded-3" placeholder="{{ __('Short description of this category...') }}"></textarea>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">{{ __('Default Unit of Measurement') }} <span class="text-danger">*</span></label>
+                            <input type="text" wire:model="unit" class="form-control rounded-3 @error('unit') is-invalid @enderror" placeholder="{{ __('e.g. pcs, meter, box, packet, roll, set') }}">
+                            <div class="d-flex flex-wrap gap-1 mt-1">
+                                @foreach(['pcs', 'meter', 'roll', 'box', 'packet', 'set', 'feet', 'bundle'] as $presetUnit)
+                                    <button type="button" wire:click="setUnit('{{ $presetUnit }}')" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-0" style="font-size: 10.5px;">
+                                        {{ $presetUnit }}
+                                    </button>
+                                @endforeach
+                            </div>
+                            @error('unit') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">{{ __('Icon (Bootstrap Icon)') }}</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi {{ $icon ?: 'bi-box-seam' }} fs-5"></i></span>
+                                <input type="text" wire:model="icon" class="form-control rounded-end-3" placeholder="{{ __('e.g. bi-router, bi-hdd-network') }}">
+                            </div>
+                            <div class="d-flex flex-wrap gap-1 mt-2">
+                                @foreach([
+                                    'bi-box-seam', 'bi-hdd-network', 'bi-router', 'bi-hdd-rack', 'bi-server',
+                                    'bi-diagram-3', 'bi-cpu', 'bi-plug', 'bi-bezier2', 'bi-tools',
+                                    'bi-battery-charging', 'bi-camera-video', 'bi-lightning-charge',
+                                    'bi-broadcast-pin', 'bi-shield-check', 'bi-tag'
+                                ] as $presetIcon)
+                                    <button type="button" wire:click="setIcon('{{ $presetIcon }}')" class="btn btn-sm {{ $icon === $presetIcon ? 'btn-primary' : 'btn-light border' }} rounded-3 p-1 px-2" title="{{ $presetIcon }}">
+                                        <i class="bi {{ $presetIcon }}"></i>
+                                    </button>
+                                @endforeach
                             </div>
                         </div>
-                        <div class="modal-footer border-0 pt-0">
-                            <button type="button" wire:click="closeModal" class="btn btn-light rounded-3 px-3">{{ __('Cancel') }}</button>
-                            <button type="submit" class="btn btn-primary rounded-3 px-4 fw-semibold">
-                                <i class="bi bi-check-lg me-1"></i> {{ $editCategoryId ? __('Update Category') : __('Save Category') }}
-                            </button>
+
+                        <div class="mb-2">
+                            <label class="form-label small fw-semibold">{{ __('Description (Optional)') }}</label>
+                            <textarea wire:model="description" rows="2" class="form-control rounded-3" placeholder="{{ __('Short description of this category...') }}"></textarea>
                         </div>
-                    </form>
-                </div>
+                    </div>
+                    <div class="modal-footer border-top bg-light py-2.5 py-md-3 px-3 px-md-4 flex-shrink-0 d-flex justify-content-end gap-2">
+                        <button type="button" wire:click="closeModal" class="btn btn-outline-secondary rounded-pill px-3">{{ __('Cancel') }}</button>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold shadow-sm">
+                            <i class="bi bi-check-lg me-1"></i> {{ $editCategoryId ? __('Update Category') : __('Save Category') }}
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     @endif

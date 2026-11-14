@@ -9,7 +9,7 @@
                 </h4>
                 <p class="text-muted small mb-0">{{ __('Manage equipment, routers, ONUs, cables, and assignments') }}</p>
             </div>
-            <div class="d-flex gap-2">
+            <div class="d-flex flex-wrap gap-2">
                 <button wire:click="openCreateCategory" class="btn btn-outline-primary rounded-3 px-3 fw-semibold">
                     <i class="bi bi-tags me-1"></i> {{ __('Manage Categories') }}
                 </button>
@@ -26,14 +26,14 @@
         <div class="card border-0 shadow-sm rounded-4 mb-4">
             <div class="card-body py-3">
                 <div class="row g-3 align-items-end">
-                    <div class="col-md-4">
+                    <div class="col-12 col-lg-4 col-md-6">
                         <label class="form-label small fw-semibold text-muted mb-1">{{ __('Search Items') }}</label>
                         <div class="input-group input-group-sm">
                             <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
                             <input type="text" wire:model.live.debounce.300ms="search" class="form-control rounded-end-3" placeholder="{{ __('Model, Serial, MAC, Brand, Location...') }}">
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-6 col-lg-3 col-md-6">
                         <label class="form-label small fw-semibold text-muted mb-1">{{ __('Category') }}</label>
                         <select wire:model.live="filterCategory" class="form-select form-select-sm rounded-3">
                             <option value="">{{ __('All Categories') }}</option>
@@ -42,7 +42,7 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-6 col-lg-2 col-md-4">
                         <label class="form-label small fw-semibold text-muted mb-1">{{ __('Status') }}</label>
                         <select wire:model.live="filterStatus" class="form-select form-select-sm rounded-3">
                             <option value="">{{ __('All Statuses') }}</option>
@@ -53,7 +53,7 @@
                             <option value="retired">{{ __('Retired') }}</option>
                         </select>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-6 col-lg-2 col-md-4">
                         <label class="form-label small fw-semibold text-muted mb-1">{{ __('Type') }}</label>
                         <select wire:model.live="filterTracking" class="form-select form-select-sm rounded-3">
                             <option value="">{{ __('All Types') }}</option>
@@ -61,7 +61,7 @@
                             <option value="bulk">{{ __('Bulk (Quantity)') }}</option>
                         </select>
                     </div>
-                    <div class="col-md-1 d-flex justify-content-end">
+                    <div class="col-6 col-lg-1 col-md-4 d-flex justify-content-end">
                         <button wire:click="$set('search', ''); $set('filterCategory', ''); $set('filterStatus', ''); $set('filterTracking', '');" class="btn btn-sm btn-light w-100 rounded-3 text-muted" title="{{ __('Reset filters') }}">
                             <i class="bi bi-arrow-counterclockwise"></i>
                         </button>
@@ -222,18 +222,17 @@
          MODAL 1: ADD / EDIT ITEM
          ========================================================================= --}}
     @if($showItemModal)
-        <div class="modal fade show d-block" style="background: rgba(0,0,0,0.5);" tabindex="-1">
+        <div class="modal fade show d-block" style="background: rgba(0,0,0,0.55); z-index: 1055;" tabindex="-1">
             <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-                <div class="modal-content border-0 rounded-4 shadow-lg">
-                    <div class="modal-header border-0 pb-0">
-                        <h5 class="modal-title fw-bold text-dark">
+                <form wire:submit.prevent="saveItem" class="modal-content border-0 rounded-4 shadow-lg overflow-hidden d-flex flex-column" style="max-height: calc(100vh - 2rem); max-height: calc(100dvh - 2rem);">
+                    <div class="modal-header border-bottom py-3 px-3 px-md-4 bg-light flex-shrink-0">
+                        <h5 class="modal-title fw-bold text-dark mb-0">
                             <i class="bi bi-box-seam me-2 text-primary"></i>
                             {{ $editItemId ? __('Edit Inventory Item') : __('Add New Item to Inventory') }}
                         </h5>
                         <button type="button" wire:click="$set('showItemModal', false)" class="btn-close"></button>
                     </div>
-                    <form wire:submit.prevent="saveItem">
-                        <div class="modal-body">
+                    <div class="modal-body p-3 p-md-4 overflow-y-auto flex-grow-1" style="min-height: 0;">
                             {{-- Link with Expense Purchase Option --}}
                             @if(!$editItemId)
                                 <div class="p-3 mb-3 rounded-3 bg-light border border-primary border-opacity-25">
@@ -266,7 +265,7 @@
 
                             <div class="row g-3">
                                 {{-- Category --}}
-                                <div class="col-md-6">
+                                <div class="col-12 col-md-6">
                                     <div class="d-flex align-items-center justify-content-between mb-1">
                                         <label class="form-label small fw-semibold mb-0">{{ __('Category') }} <span class="text-danger">*</span></label>
                                         <button type="button" wire:click="openCreateCategory" class="btn btn-link btn-sm p-0 text-decoration-none fw-bold small text-primary" title="{{ __('Add New Category') }}">
@@ -283,7 +282,7 @@
                                 </div>
 
                                 {{-- Tracking Type --}}
-                                <div class="col-md-6">
+                                <div class="col-12 col-md-6">
                                     <label class="form-label small fw-semibold">{{ __('Tracking Method') }}</label>
                                     <select wire:model.live="tracking_type" class="form-select rounded-3">
                                         <option value="serialized">{{ __('Serialized (Individual Serial/MAC - Routers, ONUs, Switches)') }}</option>
@@ -292,20 +291,20 @@
                                 </div>
 
                                 {{-- Title / Model Name --}}
-                                <div class="col-md-6">
+                                <div class="col-12 col-md-6">
                                     <label class="form-label small fw-semibold">{{ __('Item Title / Model Name') }} <span class="text-danger">*</span></label>
                                     <input type="text" wire:model="title" class="form-control rounded-3 @error('title') is-invalid @enderror" placeholder="{{ __('e.g. TP-Link Archer C6 AC1200') }}">
                                     @error('title') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
                                 {{-- Brand --}}
-                                <div class="col-md-3">
+                                <div class="col-6 col-md-3">
                                     <label class="form-label small fw-semibold">{{ __('Brand / Manufacturer') }}</label>
                                     <input type="text" wire:model="brand" class="form-control rounded-3" placeholder="{{ __('e.g. TP-Link, BDCOM, Cisco') }}">
                                 </div>
 
                                 {{-- Model No --}}
-                                <div class="col-md-3">
+                                <div class="col-6 col-md-3">
                                     <label class="form-label small fw-semibold">{{ __('Model No') }}</label>
                                     <input type="text" wire:model="model_no" class="form-control rounded-3" placeholder="{{ __('e.g. Archer-C6-V3') }}">
                                 </div>
@@ -338,20 +337,20 @@ ONU-2026-0004
                                     </div>
                                 @elseif($tracking_type === 'serialized')
                                     {{-- Serial Number --}}
-                                    <div class="col-md-6">
+                                    <div class="col-12 col-md-6">
                                         <label class="form-label small fw-semibold">{{ __('Serial Number (S/N)') }}</label>
                                         <input type="text" wire:model="serial_number" class="form-control rounded-3 @error('serial_number') is-invalid @enderror" placeholder="{{ __('Unique Serial Number') }}">
                                         @error('serial_number') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                     </div>
 
                                     {{-- MAC Address --}}
-                                    <div class="col-md-6">
+                                    <div class="col-12 col-md-6">
                                         <label class="form-label small fw-semibold">{{ __('MAC Address') }}</label>
                                         <input type="text" wire:model="mac_address" class="form-control rounded-3" placeholder="{{ __('e.g. 00:1A:2B:3C:4D:5E') }}">
                                     </div>
                                 @else
                                     {{-- Quantity --}}
-                                    <div class="col-md-6">
+                                    <div class="col-12 col-md-6">
                                         <label class="form-label small fw-semibold">{{ __('Stock Quantity') }} <span class="text-danger">*</span></label>
                                         <input type="number" step="0.01" wire:model="quantity" class="form-control rounded-3 @error('quantity') is-invalid @enderror" placeholder="{{ __('e.g. 305 (meters) or 100 (pcs)') }}">
                                         @error('quantity') <div class="invalid-feedback">{{ $message }}</div> @enderror
@@ -359,31 +358,31 @@ ONU-2026-0004
                                 @endif
 
                                 {{-- Purchase Price --}}
-                                <div class="col-md-4">
+                                <div class="col-12 col-sm-6 col-md-4">
                                     <label class="form-label small fw-semibold">{{ __('Purchase Price (৳)') }}</label>
                                     <input type="number" step="0.01" wire:model="purchase_price" class="form-control rounded-3" placeholder="0.00">
                                 </div>
 
                                 {{-- Purchase Date --}}
-                                <div class="col-md-4">
+                                <div class="col-12 col-sm-6 col-md-4">
                                     <label class="form-label small fw-semibold">{{ __('Purchase Date') }}</label>
                                     <input type="date" wire:model="purchase_date" class="form-control rounded-3">
                                 </div>
 
                                 {{-- Warranty Months --}}
-                                <div class="col-md-4">
+                                <div class="col-12 col-sm-12 col-md-4">
                                     <label class="form-label small fw-semibold">{{ __('Warranty (Months)') }}</label>
                                     <input type="number" wire:model="warranty_months" class="form-control rounded-3" placeholder="{{ __('e.g. 12') }}">
                                 </div>
 
                                 {{-- Supplier --}}
-                                <div class="col-md-6">
+                                <div class="col-12 col-md-6">
                                     <label class="form-label small fw-semibold">{{ __('Supplier / Vendor') }}</label>
                                     <input type="text" wire:model="supplier" class="form-control rounded-3" placeholder="{{ __('e.g. Computer City, Tech Land') }}">
                                 </div>
 
                                 {{-- Storage Location --}}
-                                <div class="col-md-6">
+                                <div class="col-12 col-md-6">
                                     <label class="form-label small fw-semibold">{{ __('Warehouse / Store Location') }} <span class="text-danger">*</span></label>
                                     <input type="text" wire:model="current_location_name" class="form-control rounded-3 @error('current_location_name') is-invalid @enderror" placeholder="{{ __('e.g. Head Office Shelf A, Store Room') }}">
                                     @error('current_location_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
@@ -414,9 +413,16 @@ ONU-2026-0004
                                 </div>
                             </div>
                         </div>
-                        <div class="modal-footer border-0 pt-0">
-                            <button type="button" wire:click="$set('showItemModal', false)" class="btn btn-light rounded-3 px-3">{{ __('Cancel') }}</button>
-                            <button type="submit" class="btn btn-primary rounded-3 px-4 fw-semibold">{{ __('Save Item') }}</button>
+                        <div class="modal-footer border-top bg-light py-2.5 py-md-3 px-3 px-md-4 flex-shrink-0 d-flex justify-content-between align-items-center">
+                            <small class="text-muted d-none d-sm-inline">
+                                <span class="text-danger">*</span> {{ __('Required fields') }}
+                            </small>
+                            <div class="d-flex gap-2 ms-auto">
+                                <button type="button" wire:click="$set('showItemModal', false)" class="btn btn-outline-secondary rounded-pill px-3">{{ __('Cancel') }}</button>
+                                <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold shadow-sm">
+                                    <i class="bi bi-check-circle me-1"></i> {{ __('Save Item') }}
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -428,20 +434,19 @@ ONU-2026-0004
          MODAL 2: DEPLOY / WITHDRAW ITEM
          ========================================================================= --}}
     @if($showDeployModal)
-        <div class="modal fade show d-block" style="background: rgba(0,0,0,0.5);" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content border-0 rounded-4 shadow-lg">
-                    <div class="modal-header border-0 pb-0">
-                        <h5 class="modal-title fw-bold text-dark">
+        <div class="modal fade show d-block" style="background: rgba(0,0,0,0.55); z-index: 1055;" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <form wire:submit.prevent="submitDeploy" class="modal-content border-0 rounded-4 shadow-lg overflow-hidden d-flex flex-column" style="max-height: calc(100vh - 2rem); max-height: calc(100dvh - 2rem);">
+                    <div class="modal-header border-bottom py-3 px-3 px-md-4 bg-light flex-shrink-0">
+                        <h5 class="modal-title fw-bold text-dark mb-0">
                             <i class="bi bi-arrow-up-right-circle text-primary me-2"></i>{{ __('Withdraw / Deploy Item') }}
                         </h5>
                         <button type="button" wire:click="$set('showDeployModal', false)" class="btn-close"></button>
                     </div>
-                    <form wire:submit.prevent="submitDeploy">
-                        <div class="modal-body">
+                    <div class="modal-body p-3 p-md-4 overflow-y-auto flex-grow-1" style="min-height: 0;">
                             <div class="row g-3">
                                 {{-- Destination Type --}}
-                                <div class="col-md-6">
+                                <div class="col-12 col-md-6">
                                     <label class="form-label small fw-semibold">{{ __('Deploy To (Target Type)') }}</label>
                                     <select wire:model.live="deploy_type" class="form-select rounded-3">
                                         <option value="customer">{{ __('Customer House / Office') }}</option>
@@ -453,7 +458,7 @@ ONU-2026-0004
                                 </div>
 
                                 {{-- Withdraw Date --}}
-                                <div class="col-md-6">
+                                <div class="col-12 col-md-6">
                                     <label class="form-label small fw-semibold">{{ __('Withdrawal Date') }} <span class="text-danger">*</span></label>
                                     <input type="date" wire:model="deploy_date" class="form-control rounded-3 @error('deploy_date') is-invalid @enderror">
                                     @error('deploy_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
@@ -492,7 +497,7 @@ ONU-2026-0004
                                 </div>
 
                                 {{-- Assigned Technician --}}
-                                <div class="col-md-6">
+                                <div class="col-12 col-md-6">
                                     <label class="form-label small fw-semibold">{{ __('Handed Over / Technician') }}</label>
                                     <select wire:model="deploy_technician_id" class="form-select rounded-3">
                                         <option value="">{{ __('-- Select Staff / Tech --') }}</option>
@@ -503,7 +508,7 @@ ONU-2026-0004
                                 </div>
 
                                 {{-- Deploy Quantity --}}
-                                <div class="col-md-6">
+                                <div class="col-12 col-md-6">
                                     <label class="form-label small fw-semibold">{{ __('Quantity') }}</label>
                                     <input type="number" step="0.01" wire:model="deploy_quantity" class="form-control rounded-3 @error('deploy_quantity') is-invalid @enderror">
                                     @error('deploy_quantity') <div class="invalid-feedback">{{ $message }}</div> @enderror
@@ -516,44 +521,42 @@ ONU-2026-0004
                                 </div>
                             </div>
                         </div>
-                        <div class="modal-footer border-0 pt-0">
-                            <button type="button" wire:click="$set('showDeployModal', false)" class="btn btn-light rounded-3 px-3">{{ __('Cancel') }}</button>
-                            <button type="submit" class="btn btn-primary rounded-3 px-4 fw-semibold">{{ __('Confirm Withdraw & Deploy') }}</button>
+                        <div class="modal-footer border-top bg-light py-2.5 py-md-3 px-3 px-md-4 flex-shrink-0 d-flex justify-content-end gap-2">
+                            <button type="button" wire:click="$set('showDeployModal', false)" class="btn btn-outline-secondary rounded-pill px-3">{{ __('Cancel') }}</button>
+                            <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold shadow-sm">{{ __('Confirm Withdraw & Deploy') }}</button>
                         </div>
                     </form>
                 </div>
             </div>
-        </div>
     @endif
 
     {{-- =========================================================================
          MODAL 3: REPORT DAMAGED / BROKEN
          ========================================================================= --}}
     @if($showDamageModal)
-        <div class="modal fade show d-block" style="background: rgba(0,0,0,0.5);" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content border-0 rounded-4 shadow-lg">
-                    <div class="modal-header border-0 pb-0">
-                        <h5 class="modal-title fw-bold text-danger">
+        <div class="modal fade show d-block" style="background: rgba(0,0,0,0.55); z-index: 1055;" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <form wire:submit.prevent="submitDamage" class="modal-content border-0 rounded-4 shadow-lg overflow-hidden d-flex flex-column" style="max-height: calc(100vh - 2rem); max-height: calc(100dvh - 2rem);">
+                    <div class="modal-header border-bottom py-3 px-3 px-md-4 bg-light flex-shrink-0">
+                        <h5 class="modal-title fw-bold text-danger mb-0">
                             <i class="bi bi-exclamation-octagon text-danger me-2"></i>{{ __('Report Damaged / Faulty Item') }}
                         </h5>
                         <button type="button" wire:click="$set('showDamageModal', false)" class="btn-close"></button>
                     </div>
-                    <form wire:submit.prevent="submitDamage">
-                        <div class="modal-body">
+                    <div class="modal-body p-3 p-md-4 overflow-y-auto flex-grow-1" style="min-height: 0;">
                             <div class="row g-3">
-                                <div class="col-md-6">
+                                <div class="col-12 col-md-6">
                                     <label class="form-label small fw-semibold">{{ __('Status Type') }}</label>
                                     <select wire:model="damage_status" class="form-select rounded-3">
                                         <option value="damaged">{{ __('Damaged / Broken') }}</option>
                                         <option value="under_repair">{{ __('Under Repair') }}</option>
                                     </select>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-12 col-md-6">
                                     <label class="form-label small fw-semibold">{{ __('Date of Incident') }} <span class="text-danger">*</span></label>
                                     <input type="date" wire:model="damage_date" class="form-control rounded-3">
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-12 col-md-6">
                                     <label class="form-label small fw-semibold">{{ __('Damage Cause / Diagnosis') }} <span class="text-danger">*</span></label>
                                     <select wire:model="damage_type" class="form-select rounded-3">
                                         <option value="burned_surge">⚡ {{ __('Power Surge / Burned') }}</option>
@@ -566,7 +569,7 @@ ONU-2026-0004
                                         <option value="other">❓ {{ __('Other / Unknown') }}</option>
                                     </select>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-12 col-md-6">
                                     <label class="form-label small fw-semibold">{{ __('Warranty Status') }}</label>
                                     <select wire:model="warranty_status" class="form-select rounded-3">
                                         <option value="under_warranty">🛡️ {{ __('Under Warranty') }}</option>
@@ -613,52 +616,49 @@ ONU-2026-0004
                                 @endif
                             </div>
                         </div>
-                        <div class="modal-footer border-0 pt-0">
-                            <button type="button" wire:click="$set('showDamageModal', false)" class="btn btn-light rounded-3 px-3">{{ __('Cancel') }}</button>
-                            <button type="submit" class="btn btn-danger rounded-3 px-4 fw-semibold">{{ __('Confirm Damage Report') }}</button>
+                        <div class="modal-footer border-top bg-light py-2.5 py-md-3 px-3 px-md-4 flex-shrink-0 d-flex justify-content-end gap-2">
+                            <button type="button" wire:click="$set('showDamageModal', false)" class="btn btn-outline-secondary rounded-pill px-3">{{ __('Cancel') }}</button>
+                            <button type="submit" class="btn btn-danger rounded-pill px-4 fw-semibold shadow-sm">{{ __('Confirm Damage Report') }}</button>
                         </div>
                     </form>
                 </div>
             </div>
-        </div>
     @endif
 
     {{-- =========================================================================
          MODAL 4: RETURN TO STOCK
          ========================================================================= --}}
     @if($showReturnModal)
-        <div class="modal fade show d-block" style="background: rgba(0,0,0,0.5);" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content border-0 rounded-4 shadow-lg">
-                    <div class="modal-header border-0 pb-0">
-                        <h5 class="modal-title fw-bold text-success">
+        <div class="modal fade show d-block" style="background: rgba(0,0,0,0.55); z-index: 1055;" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <form wire:submit.prevent="submitReturn" class="modal-content border-0 rounded-4 shadow-lg overflow-hidden d-flex flex-column" style="max-height: calc(100vh - 2rem); max-height: calc(100dvh - 2rem);">
+                    <div class="modal-header border-bottom py-3 px-3 px-md-4 bg-light flex-shrink-0">
+                        <h5 class="modal-title fw-bold text-success mb-0">
                             <i class="bi bi-arrow-down-left-circle text-success me-2"></i>{{ __('Return Item to Stock') }}
                         </h5>
                         <button type="button" wire:click="$set('showReturnModal', false)" class="btn-close"></button>
                     </div>
-                    <form wire:submit.prevent="submitReturn">
-                        <div class="modal-body">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold">{{ __('Return Date') }} <span class="text-danger">*</span></label>
-                                    <input type="date" wire:model="return_date" class="form-control rounded-3">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold">{{ __('Return Location / Shelf') }} <span class="text-danger">*</span></label>
-                                    <input type="text" wire:model="return_location" class="form-control rounded-3" placeholder="{{ __('e.g. Main Store Shelf B') }}">
-                                </div>
-                                <div class="col-12">
-                                    <label class="form-label small fw-semibold">{{ __('Condition / Notes') }}</label>
-                                    <textarea wire:model="return_notes" rows="2" class="form-control rounded-3" placeholder="{{ __('e.g. Customer disconnected service, router is in working condition.') }}"></textarea>
-                                </div>
+                    <div class="modal-body p-3 p-md-4 overflow-y-auto flex-grow-1" style="min-height: 0;">
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label class="form-label small fw-semibold">{{ __('Return Date') }} <span class="text-danger">*</span></label>
+                                <input type="date" wire:model="return_date" class="form-control rounded-3">
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label small fw-semibold">{{ __('Return Location / Shelf') }} <span class="text-danger">*</span></label>
+                                <input type="text" wire:model="return_location" class="form-control rounded-3" placeholder="{{ __('e.g. Main Store Shelf B') }}">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold">{{ __('Condition / Notes') }}</label>
+                                <textarea wire:model="return_notes" rows="2" class="form-control rounded-3" placeholder="{{ __('e.g. Customer disconnected service, router is in working condition.') }}"></textarea>
                             </div>
                         </div>
-                        <div class="modal-footer border-0 pt-0">
-                            <button type="button" wire:click="$set('showReturnModal', false)" class="btn btn-light rounded-3 px-3">{{ __('Cancel') }}</button>
-                            <button type="submit" class="btn btn-success rounded-3 px-4 fw-semibold">{{ __('Confirm Return') }}</button>
-                        </div>
-                    </form>
-                </div>
+                    </div>
+                    <div class="modal-footer border-top bg-light py-2.5 py-md-3 px-3 px-md-4 flex-shrink-0 d-flex justify-content-end gap-2">
+                        <button type="button" wire:click="$set('showReturnModal', false)" class="btn btn-outline-secondary rounded-pill px-3">{{ __('Cancel') }}</button>
+                        <button type="submit" class="btn btn-success rounded-pill px-4 fw-semibold shadow-sm">{{ __('Confirm Return') }}</button>
+                    </div>
+                </form>
             </div>
         </div>
     @endif
@@ -667,12 +667,12 @@ ONU-2026-0004
          MODAL 5: ITEM AUDIT TIMELINE
          ========================================================================= --}}
     @if($showHistoryModal && $viewingItem)
-        <div class="modal fade show d-block" style="background: rgba(0,0,0,0.5);" tabindex="-1">
+        <div class="modal fade show d-block" style="background: rgba(0,0,0,0.55); z-index: 1055;" tabindex="-1">
             <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-                <div class="modal-content border-0 rounded-4 shadow-lg">
-                    <div class="modal-header border-0 pb-0">
+                <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden d-flex flex-column" style="max-height: calc(100vh - 2rem); max-height: calc(100dvh - 2rem);">
+                    <div class="modal-header border-bottom py-3 px-3 px-md-4 bg-light flex-shrink-0 d-flex justify-content-between align-items-center">
                         <div>
-                            <h5 class="modal-title fw-bold text-dark">
+                            <h5 class="modal-title fw-bold text-dark mb-0">
                                 <i class="bi bi-clock-history me-2 text-primary"></i>{{ $viewingItem->title }}
                             </h5>
                             <small class="text-muted">
@@ -683,7 +683,7 @@ ONU-2026-0004
                         </div>
                         <button type="button" wire:click="$set('showHistoryModal', false)" class="btn-close"></button>
                     </div>
-                    <div class="modal-body py-4">
+                    <div class="modal-body p-3 p-md-4 overflow-y-auto flex-grow-1" style="min-height: 0;">
                         @if($viewingItem->expense)
                             <div class="card border rounded-3 p-3 mb-4 bg-light border-primary border-opacity-25 shadow-2xs">
                                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
@@ -782,8 +782,8 @@ ONU-2026-0004
                             </table>
                         </div>
                     </div>
-                    <div class="modal-footer border-0 pt-0">
-                        <button type="button" wire:click="$set('showHistoryModal', false)" class="btn btn-secondary rounded-3 px-4">{{ __('Close') }}</button>
+                    <div class="modal-footer border-top bg-light py-2.5 py-md-3 px-3 px-md-4 flex-shrink-0 d-flex justify-content-end">
+                        <button type="button" wire:click="$set('showHistoryModal', false)" class="btn btn-secondary rounded-pill px-4">{{ __('Close') }}</button>
                     </div>
                 </div>
             </div>
@@ -796,15 +796,15 @@ ONU-2026-0004
     @if($showCategoryModal)
         <div class="modal fade show d-block" style="background: rgba(0,0,0,0.65); z-index: 1070;" tabindex="-1">
             <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-                <div class="modal-content border-0 rounded-4 shadow-lg">
-                    <div class="modal-header border-0 pb-0">
-                        <h5 class="modal-title fw-bold text-dark">
+                <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden d-flex flex-column" style="max-height: calc(100vh - 2rem); max-height: calc(100dvh - 2rem);">
+                    <div class="modal-header border-bottom py-3 px-3 px-md-4 bg-light flex-shrink-0">
+                        <h5 class="modal-title fw-bold text-dark mb-0">
                             <i class="bi bi-tags me-2 text-primary"></i>
                             {{ $catEditId ? __('Edit Category') : __('Manage & Add Categories') }}
                         </h5>
                         <button type="button" wire:click="closeCategoryModal" class="btn-close"></button>
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body p-3 p-md-4 overflow-y-auto flex-grow-1" style="min-height: 0;">
                         {{-- Create / Edit Form Card --}}
                         <div class="card rounded-3 p-3 mb-4" style="{{ $catEditId ? 'background: rgba(245, 128, 62, 0.08) !important; border: 1px solid rgba(245, 128, 62, 0.35) !important;' : 'background: #f8fafc !important; border: 1px solid rgba(44, 123, 229, 0.25) !important;' }}">
                             <div class="d-flex align-items-center justify-content-between mb-2">
@@ -821,13 +821,13 @@ ONU-2026-0004
 
                             <form wire:submit.prevent="saveCategory">
                                 <div class="row g-3">
-                                    <div class="col-md-6">
+                                    <div class="col-12 col-md-6">
                                         <label class="form-label small fw-semibold">{{ __('Category Name') }} <span class="text-danger">*</span></label>
                                         <input type="text" wire:model="catName" class="form-control rounded-3 @error('catName') is-invalid @enderror" placeholder="{{ __('e.g. OLT, Server, Splitter, Drop Wire, UPS') }}">
                                         @error('catName') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                     </div>
 
-                                    <div class="col-md-6">
+                                    <div class="col-12 col-md-6">
                                         <label class="form-label small fw-semibold">{{ __('Tracking Method') }} <span class="text-danger">*</span></label>
                                         <select wire:model.live="catTrackingType" class="form-select rounded-3">
                                             <option value="serialized">{{ __('Serialized (Individual Serial/MAC - Routers, ONUs, Switches)') }}</option>
@@ -835,7 +835,7 @@ ONU-2026-0004
                                         </select>
                                     </div>
 
-                                    <div class="col-md-6">
+                                    <div class="col-12 col-md-6">
                                         <label class="form-label small fw-semibold">{{ __('Default Unit of Measurement') }} <span class="text-danger">*</span></label>
                                         <input type="text" wire:model="catUnit" class="form-control rounded-3 @error('catUnit') is-invalid @enderror" placeholder="{{ __('e.g. pcs, meter, roll, box, packet, set') }}">
                                         <div class="d-flex flex-wrap gap-1 mt-1">
@@ -848,7 +848,7 @@ ONU-2026-0004
                                         @error('catUnit') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                     </div>
 
-                                    <div class="col-md-6">
+                                    <div class="col-12 col-md-6">
                                         <label class="form-label small fw-semibold">{{ __('Icon (Bootstrap Icon)') }}</label>
                                         <div class="input-group input-group-sm">
                                             <span class="input-group-text bg-white"><i class="bi {{ $catIcon ?: 'bi-box-seam' }} text-primary fs-6"></i></span>
@@ -945,8 +945,8 @@ ONU-2026-0004
                             </table>
                         </div>
                     </div>
-                    <div class="modal-footer border-0 pt-0">
-                        <button type="button" wire:click="closeCategoryModal" class="btn btn-secondary rounded-3 px-4">{{ __('Close') }}</button>
+                    <div class="modal-footer border-top bg-light py-2.5 py-md-3 px-3 px-md-4 flex-shrink-0 d-flex justify-content-end">
+                        <button type="button" wire:click="closeCategoryModal" class="btn btn-secondary rounded-pill px-4">{{ __('Close') }}</button>
                     </div>
                 </div>
             </div>

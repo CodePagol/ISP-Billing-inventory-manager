@@ -1,8 +1,8 @@
 @if($printAssignment)
-<div class="modal fade show d-block" style="background: rgba(0,0,0,0.65);" tabindex="-1" aria-modal="true" role="dialog">
+<div class="modal fade show d-block" style="background: rgba(0,0,0,0.65); z-index: 1060;" tabindex="-1" aria-modal="true" role="dialog">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content border-0 rounded-4 shadow-lg">
-            <div class="modal-header border-0 pb-0 px-4 pt-3 d-flex justify-content-between align-items-center">
+        <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden d-flex flex-column" style="max-height: calc(100vh - 2rem); max-height: calc(100dvh - 2rem);">
+            <div class="modal-header border-0 pb-2 px-3 px-md-4 pt-3 d-flex justify-content-between align-items-center flex-shrink-0">
                 <div>
                     <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1 text-xs fw-semibold">
                         <i class="bi bi-printer me-1"></i> {{ __('Dual Copy Gate Pass: Office & Customer Copy (Exactly 1 Page)') }}
@@ -14,7 +14,7 @@
                 <button type="button" wire:click="closePrintChallan" class="btn-close"></button>
             </div>
 
-            <div class="modal-body px-3 py-3" style="background: #f1f5f9;">
+            <div class="modal-body px-2 px-md-3 py-3 overflow-y-auto flex-grow-1" style="min-height: 0; background: #f1f5f9;">
                 @php
                     $copies = [
                         [
@@ -215,9 +215,9 @@
                 </div>
             </div>
 
-            <div class="modal-footer border-0 px-4 py-3" style="background:#ffffff;">
-                <button type="button" wire:click="closePrintChallan" class="btn btn-light rounded-3 px-4">{{ __('Close') }}</button>
-                <button type="button" onclick="window.doPrintChallan()" class="btn btn-success rounded-3 px-5 fw-semibold shadow-sm">
+            <div class="modal-footer border-0 px-3 px-md-4 py-2.5 py-md-3 flex-shrink-0" style="background:#ffffff;">
+                <button type="button" wire:click="closePrintChallan" class="btn btn-light rounded-pill px-4">{{ __('Close') }}</button>
+                <button type="button" onclick="window.doPrintChallan()" class="btn btn-success rounded-pill px-4 px-md-5 fw-semibold shadow-sm">
                     <i class="bi bi-printer me-2"></i> {{ __('Print Dual Copy (A4)') }}
                 </button>
             </div>
