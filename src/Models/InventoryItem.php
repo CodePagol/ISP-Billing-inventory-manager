@@ -85,16 +85,16 @@ class InventoryItem extends Model
     public function getWarrantyBadgeAttribute(): string
     {
         if ($this->warranty_status === 'under_warranty') {
-            return '<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25" style="font-size:11px;"><i class="bi bi-shield-check me-1"></i>Under Warranty</span>';
+            return '<span class="badge badge-subtle-success rounded-pill fw-semibold" style="font-size:11px;"><i class="bi bi-shield-check me-1"></i>Under Warranty</span>';
         }
         if ($this->warranty_status === 'out_of_warranty') {
-            return '<span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25" style="font-size:11px;"><i class="bi bi-shield-x me-1"></i>Out of Warranty</span>';
+            return '<span class="badge badge-subtle-secondary rounded-pill fw-semibold" style="font-size:11px;"><i class="bi bi-shield-x me-1"></i>Out of Warranty</span>';
         }
         if ($this->warranty_status === 'sent_for_rma') {
-            return '<span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25" style="font-size:11px;"><i class="bi bi-arrow-repeat me-1"></i>Sent for RMA</span>';
+            return '<span class="badge badge-subtle-warning rounded-pill fw-semibold" style="font-size:11px;"><i class="bi bi-arrow-repeat me-1"></i>Sent for RMA</span>';
         }
         if ($this->warranty_status === 'void') {
-            return '<span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25" style="font-size:11px;"><i class="bi bi-shield-slash me-1"></i>Warranty Void</span>';
+            return '<span class="badge badge-subtle-danger rounded-pill fw-semibold" style="font-size:11px;"><i class="bi bi-shield-slash me-1"></i>Warranty Void</span>';
         }
         return '';
     }

@@ -123,18 +123,18 @@
                 <div class="row g-3">
                     @forelse($categories as $cat)
                         <div class="col-md-4 col-lg-3">
-                            <div class="p-3 rounded-4 border {{ $cat->total_qty > 0 ? 'bg-white shadow-sm border-primary border-opacity-25' : 'bg-light bg-opacity-40' }} h-100 d-flex flex-column justify-content-between">
+                            <div class="p-3 rounded-4 border {{ $cat->total_qty > 0 ? 'bg-white shadow-sm' : 'bg-light' }} h-100 d-flex flex-column justify-content-between" style="{{ $cat->total_qty > 0 ? 'border-color: rgba(44, 123, 229, 0.25) !important;' : 'border-color: #e2e8f0 !important;' }}">
                                 <div>
                                     <div class="d-flex align-items-center justify-content-between mb-2">
                                         <span class="fw-bold text-dark text-truncate" title="{{ $cat->name }}">
                                             <i class="bi {{ $cat->icon ?? 'bi-box-seam' }} text-primary me-1"></i> {{ $cat->name }}
                                         </span>
                                         @if($cat->tracking_type === 'serialized')
-                                            <span class="badge rounded-pill fw-semibold border" style="background: rgba(37, 99, 235, 0.1) !important; color: #1d4ed8 !important; border-color: rgba(37, 99, 235, 0.25) !important; font-size: 9.5px; padding: 3px 8px;">
+                                            <span class="badge badge-subtle-primary rounded-pill fw-semibold" style="font-size: 10px; padding: 3px 8px;">
                                                 {{ __('Serialized') }}
                                             </span>
                                         @else
-                                            <span class="badge rounded-pill fw-semibold border" style="background: rgba(22, 163, 74, 0.1) !important; color: #15803d !important; border-color: rgba(22, 163, 74, 0.25) !important; font-size: 9.5px; padding: 3px 8px;">
+                                            <span class="badge badge-subtle-success rounded-pill fw-semibold" style="font-size: 10px; padding: 3px 8px;">
                                                 {{ __('Bulk') }}
                                             </span>
                                         @endif
@@ -247,13 +247,13 @@
                                         </td>
                                         <td>
                                             @if($assign->status === 'deployed')
-                                                <span class="badge bg-primary rounded-pill">{{ __('In Use') }}</span>
+                                                <span class="badge badge-subtle-primary rounded-pill px-2.5 py-1 fw-semibold">{{ __('In Use') }}</span>
                                             @elseif($assign->status === 'returned')
-                                                <span class="badge bg-success rounded-pill">{{ __('Returned') }}</span>
+                                                <span class="badge badge-subtle-success rounded-pill px-2.5 py-1 fw-semibold">{{ __('Returned') }}</span>
                                             @elseif($assign->status === 'damaged')
-                                                <span class="badge bg-danger rounded-pill">{{ __('Damaged') }}</span>
+                                                <span class="badge badge-subtle-danger rounded-pill px-2.5 py-1 fw-semibold">{{ __('Damaged') }}</span>
                                             @else
-                                                <span class="badge bg-secondary rounded-pill">{{ ucfirst($assign->status) }}</span>
+                                                <span class="badge badge-subtle-secondary rounded-pill px-2.5 py-1 fw-semibold">{{ ucfirst($assign->status) }}</span>
                                             @endif
                                         </td>
                                     </tr>
@@ -277,14 +277,14 @@
                         <h6 class="fw-bold mb-0 text-danger">
                             <i class="bi bi-exclamation-octagon text-danger me-2"></i>{{ __('Damaged / Faulty Assets') }}
                         </h6>
-                        <span class="badge bg-danger rounded-pill">{{ $damagedCount }} {{ __('Issues') }}</span>
+                        <span class="badge badge-subtle-danger rounded-pill px-3 py-1 fw-bold">{{ $damagedCount }} {{ __('Issues') }}</span>
                     </div>
                     <div class="card-body pt-0">
                         @forelse($recentDamaged as $dmg)
-                            <div class="p-3 mb-2 rounded-3 border border-danger border-opacity-25 bg-danger bg-opacity-10">
+                            <div class="p-3 mb-2 rounded-3" style="background: rgba(220, 38, 38, 0.05) !important; border: 1px solid rgba(220, 38, 38, 0.25) !important;">
                                 <div class="d-flex justify-content-between align-items-start mb-1">
                                     <div class="fw-bold text-dark">{{ $dmg->title }}</div>
-                                    <span class="badge bg-danger">{{ __('Damaged') }}</span>
+                                    <span class="badge badge-subtle-danger rounded-pill px-2.5 py-1">{{ __('Damaged') }}</span>
                                 </div>
                                 <div class="small text-muted mb-1">
                                     @if($dmg->serial_number)

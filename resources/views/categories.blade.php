@@ -68,11 +68,11 @@
                                         </div>
                                     </div>
                                     @if($cat->tracking_type === 'serialized')
-                                        <span class="badge rounded-pill fw-semibold border" style="background: rgba(37, 99, 235, 0.1) !important; color: #1d4ed8 !important; border-color: rgba(37, 99, 235, 0.25) !important; font-size: 9.5px; padding: 3px 8px;">
+                                        <span class="badge badge-subtle-primary rounded-pill fw-semibold" style="font-size: 10px; padding: 3px 8px;">
                                             {{ __('Serialized') }}
                                         </span>
                                     @else
-                                        <span class="badge rounded-pill fw-semibold border" style="background: rgba(22, 163, 74, 0.1) !important; color: #15803d !important; border-color: rgba(22, 163, 74, 0.25) !important; font-size: 9.5px; padding: 3px 8px;">
+                                        <span class="badge badge-subtle-success rounded-pill fw-semibold" style="font-size: 10px; padding: 3px 8px;">
                                             {{ __('Bulk') }}
                                         </span>
                                     @endif
@@ -176,16 +176,16 @@
                                 <label class="form-label small fw-semibold">{{ __('Tracking Method') }} <span class="text-danger">*</span></label>
                                 <div class="row g-2">
                                     <div class="col-6">
-                                        <div class="border rounded-3 p-2 text-center {{ $tracking_type === 'serialized' ? 'border-primary bg-primary bg-opacity-10' : 'bg-light' }}" style="cursor: pointer;" wire:click="$set('tracking_type', 'serialized')">
+                                        <div class="rounded-3 p-2 text-center" style="cursor: pointer; {{ $tracking_type === 'serialized' ? 'background: rgba(44, 123, 229, 0.08) !important; border: 1.5px solid #2c7be5 !important;' : 'background: #f8fafc !important; border: 1px solid #cbd5e1 !important;' }}" wire:click="$set('tracking_type', 'serialized')">
                                             <input type="radio" wire:model="tracking_type" value="serialized" id="track_ser" class="form-check-input me-1">
-                                            <label for="track_ser" class="small fw-bold mb-0 d-block cursor-pointer">{{ __('Serialized') }}</label>
+                                            <label for="track_ser" class="small fw-bold mb-0 d-block cursor-pointer text-dark">{{ __('Serialized') }}</label>
                                             <small class="text-muted d-block" style="font-size: 10px;">{{ __('Routers, ONUs, S/N, MAC') }}</small>
                                         </div>
                                     </div>
                                     <div class="col-6">
-                                        <div class="border rounded-3 p-2 text-center {{ $tracking_type === 'bulk' ? 'border-primary bg-primary bg-opacity-10' : 'bg-light' }}" style="cursor: pointer;" wire:click="$set('tracking_type', 'bulk')">
+                                        <div class="rounded-3 p-2 text-center" style="cursor: pointer; {{ $tracking_type === 'bulk' ? 'background: rgba(44, 123, 229, 0.08) !important; border: 1.5px solid #2c7be5 !important;' : 'background: #f8fafc !important; border: 1px solid #cbd5e1 !important;' }}" wire:click="$set('tracking_type', 'bulk')">
                                             <input type="radio" wire:model="tracking_type" value="bulk" id="track_bulk" class="form-check-input me-1">
-                                            <label for="track_bulk" class="small fw-bold mb-0 d-block cursor-pointer">{{ __('Bulk Stock') }}</label>
+                                            <label for="track_bulk" class="small fw-bold mb-0 d-block cursor-pointer text-dark">{{ __('Bulk Stock') }}</label>
                                             <small class="text-muted d-block" style="font-size: 10px;">{{ __('Cables, RJ45, Quantity/Meters') }}</small>
                                         </div>
                                     </div>

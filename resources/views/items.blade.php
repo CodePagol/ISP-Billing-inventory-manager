@@ -113,7 +113,7 @@
                                             <div><small class="text-muted">MAC: <code>{{ $item->mac_address }}</code></small></div>
                                         @endif
                                     @else
-                                        <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25">{{ __('Bulk Managed') }}</span>
+                                        <span class="badge badge-subtle-info rounded-pill fw-semibold">{{ __('Bulk Managed') }}</span>
                                     @endif
                                 </td>
                                 <td>
@@ -135,12 +135,12 @@
                                     <small class="text-muted">{{ $item->purchase_date ? $item->purchase_date->format('d M, Y') : '-' }}</small>
                                 </td>
                                 <td>
-                                    <span class="badge bg-{{ $item->status_color }} rounded-pill px-3 py-1">
+                                    <span class="badge badge-subtle-{{ $item->status_color }} rounded-pill px-3 py-1 fw-bold">
                                         {{ $item->status_label }}
                                     </span>
                                     @if($item->status === 'damaged')
                                         <div class="mt-1">
-                                            <span class="badge bg-danger bg-opacity-10 text-white border border-danger border-opacity-25" style="font-size:11px;">
+                                            <span class="badge badge-subtle-danger rounded-pill fw-medium" style="font-size:11px;">
                                                 {{ $item->damage_type_label }}
                                             </span>
                                         </div>
@@ -584,7 +584,7 @@ ONU-2026-0004
                                 {{-- Customer One-Click Replacement --}}
                                 @if($viewingItem && $viewingItem->assigned_customer_id)
                                     <div class="col-12">
-                                        <div class="card border-warning bg-warning bg-opacity-10 p-3 rounded-3">
+                                        <div class="card p-3 rounded-3" style="background: rgba(245, 128, 62, 0.08) !important; border: 1px solid rgba(245, 128, 62, 0.35) !important;">
                                             <div class="form-check form-switch mb-2">
                                                 <input class="form-check-input" type="checkbox" role="switch" id="replaceCustomerCheck" wire:model.live="replace_for_customer">
                                                 <label class="form-check-label fw-bold text-dark small" for="replaceCustomerCheck">
@@ -678,7 +678,7 @@ ONU-2026-0004
                             <small class="text-muted">
                                 @if($viewingItem->serial_number) SN: <code>{{ $viewingItem->serial_number }}</code> &bull; @endif
                                 {{ $viewingItem->category?->name }} &bull;
-                                <span class="badge bg-{{ $viewingItem->status_color }}">{{ $viewingItem->status_label }}</span>
+                                <span class="badge badge-subtle-{{ $viewingItem->status_color }} rounded-pill px-2.5 py-1 fw-bold">{{ $viewingItem->status_label }}</span>
                             </small>
                         </div>
                         <button type="button" wire:click="$set('showHistoryModal', false)" class="btn-close"></button>
@@ -688,8 +688,8 @@ ONU-2026-0004
                             <div class="card border rounded-3 p-3 mb-4 bg-light border-primary border-opacity-25 shadow-2xs">
                                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
                                     <div class="d-flex align-items-center">
-                                        <div class="rounded-3 p-2 me-3 bg-danger bg-opacity-10 text-danger">
-                                            <i class="bi bi-wallet2 fs-4"></i>
+                                        <div class="rounded-3 d-flex align-items-center justify-content-center me-3" style="width: 44px; height: 44px; background: rgba(220, 38, 38, 0.12) !important;">
+                                            <i class="bi bi-wallet2 fs-4" style="color: #dc2626 !important;"></i>
                                         </div>
                                         <div>
                                             <div class="fw-bold text-dark small d-flex align-items-center">
@@ -734,7 +734,7 @@ ONU-2026-0004
                                             </td>
                                             <td>{{ $asg->technician?->name ?? '-' }}</td>
                                             <td>
-                                                <span class="badge bg-{{ $asg->status === 'deployed' ? 'primary' : ($asg->status === 'returned' ? 'success' : 'danger') }}">
+                                                <span class="badge badge-subtle-{{ $asg->status === 'deployed' ? 'primary' : ($asg->status === 'returned' ? 'success' : 'danger') }} rounded-pill fw-semibold">
                                                     {{ ucfirst($asg->status) }}
                                                 </span>
                                             </td>
@@ -768,7 +768,7 @@ ONU-2026-0004
                                     @forelse($viewingItem->stockLogs as $log)
                                         <tr>
                                             <td>{{ $log->created_at->format('d M Y, h:i A') }}</td>
-                                            <td><span class="badge bg-secondary">{{ strtoupper($log->type) }}</span></td>
+                                            <td><span class="badge badge-subtle-secondary rounded-pill px-2.5 py-1">{{ strtoupper($log->type) }}</span></td>
                                             <td class="fw-bold {{ $log->quantity_change < 0 ? 'text-danger' : 'text-success' }}">
                                                 {{ $log->quantity_change > 0 ? '+' : '' }}{{ $log->quantity_change }}
                                             </td>
@@ -806,7 +806,7 @@ ONU-2026-0004
                     </div>
                     <div class="modal-body">
                         {{-- Create / Edit Form Card --}}
-                        <div class="card border rounded-3 p-3 mb-4 {{ $catEditId ? 'border-warning bg-warning bg-opacity-10' : 'border-primary border-opacity-25 bg-light' }}">
+                        <div class="card rounded-3 p-3 mb-4" style="{{ $catEditId ? 'background: rgba(245, 128, 62, 0.08) !important; border: 1px solid rgba(245, 128, 62, 0.35) !important;' : 'background: #f8fafc !important; border: 1px solid rgba(44, 123, 229, 0.25) !important;' }}">
                             <div class="d-flex align-items-center justify-content-between mb-2">
                                 <h6 class="fw-bold mb-0 {{ $catEditId ? 'text-warning text-dark' : 'text-primary' }}">
                                     <i class="bi {{ $catEditId ? 'bi-pencil-square' : 'bi-plus-circle' }} me-1"></i>
@@ -914,11 +914,11 @@ ONU-2026-0004
                                             </td>
                                             <td>
                                                 @if($cat->tracking_type === 'serialized')
-                                                    <span class="badge rounded-pill fw-semibold border" style="background: rgba(37, 99, 235, 0.1) !important; color: #1d4ed8 !important; border-color: rgba(37, 99, 235, 0.25) !important; font-size: 9.5px; padding: 2px 7px;">
+                                                    <span class="badge badge-subtle-primary rounded-pill fw-semibold" style="font-size: 10px; padding: 2px 7px;">
                                                         {{ __('Serialized') }}
                                                     </span>
                                                 @else
-                                                    <span class="badge rounded-pill fw-semibold border" style="background: rgba(22, 163, 74, 0.1) !important; color: #15803d !important; border-color: rgba(22, 163, 74, 0.25) !important; font-size: 9.5px; padding: 2px 7px;">
+                                                    <span class="badge badge-subtle-success rounded-pill fw-semibold" style="font-size: 10px; padding: 2px 7px;">
                                                         {{ __('Bulk') }}
                                                     </span>
                                                 @endif

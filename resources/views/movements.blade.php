@@ -135,13 +135,13 @@
                                     </td>
                                     <td>
                                         @if($row->status === 'deployed')
-                                            <span class="badge bg-primary rounded-pill">{{ __('In Use') }}</span>
+                                            <span class="badge badge-subtle-primary rounded-pill px-2.5 py-1 fw-semibold">{{ __('In Use') }}</span>
                                         @elseif($row->status === 'returned')
-                                            <span class="badge bg-success rounded-pill">{{ __('Returned') }}</span>
+                                            <span class="badge badge-subtle-success rounded-pill px-2.5 py-1 fw-semibold">{{ __('Returned') }}</span>
                                         @elseif($row->status === 'damaged')
-                                            <span class="badge bg-danger rounded-pill">{{ __('Damaged') }}</span>
+                                            <span class="badge badge-subtle-danger rounded-pill px-2.5 py-1 fw-semibold">{{ __('Damaged') }}</span>
                                         @else
-                                            <span class="badge bg-secondary rounded-pill">{{ ucfirst($row->status) }}</span>
+                                            <span class="badge badge-subtle-secondary rounded-pill px-2.5 py-1 fw-semibold">{{ ucfirst($row->status) }}</span>
                                         @endif
                                     </td>
                                     <td class="small text-muted">
@@ -189,7 +189,7 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <span class="badge bg-secondary rounded-pill px-3">{{ strtoupper($log->type) }}</span>
+                                        <span class="badge badge-subtle-secondary rounded-pill px-3 py-1 fw-semibold">{{ strtoupper($log->type) }}</span>
                                     </td>
                                     <td class="fw-bold {{ $log->quantity_change < 0 ? 'text-danger' : 'text-success' }}">
                                         {{ $log->quantity_change > 0 ? '+' : '' }}{{ $log->quantity_change }}
