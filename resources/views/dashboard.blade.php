@@ -200,10 +200,6 @@
                             {{ __('No categories found matching your filter.') }}
                         </div>
                     @endforelse
-                        <div class="col-12 py-3 text-center text-muted">
-                            {{ __('No categories found.') }}
-                        </div>
-                    @endforelse
                 </div>
             </div>
         </div>

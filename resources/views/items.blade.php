@@ -140,7 +140,7 @@
                                     </span>
                                     @if($item->status === 'damaged')
                                         <div class="mt-1">
-                                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25" style="font-size:11px;">
+                                            <span class="badge bg-danger bg-opacity-10 text-white border border-danger border-opacity-25" style="font-size:11px;">
                                                 {{ $item->damage_type_label }}
                                             </span>
                                         </div>
