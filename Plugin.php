@@ -17,7 +17,7 @@ class Plugin extends AbstractPlugin
 {
     public function getId(): string      { return 'inventory-manager'; }
     public function getName(): string    { return 'Inventory & Asset Manager'; }
-    public function getVersion(): string { return '1.0.0'; }
+    public function getVersion(): string { return '1.0.1'; }
     public function getAuthor(): string  { return 'Code Pagol Ltd'; }
 
     public function getDescription(): string

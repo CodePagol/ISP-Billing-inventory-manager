@@ -5,6 +5,7 @@ All notable changes to the "Inventory & Asset Manager" plugin will be documented
 ## [v1.0.1] - 2026-11-14
 
 ### Fixed & Improved
+- **Auto-Seeded Default Categories:** Added automatic category seeder (`InventoryCategorySeeder`) on fresh install/migration, pre-populating standard ISP categories: ONU / XPON, Wi-Fi Router, Network Switch, Optical Fiber Cable, Media Converter (MC), Patch Cord & Connectors, Tools & Accessories, and SFP Modules.
 - **100% Responsive UI Layout:** Full responsive compatibility across mobile, tablet, laptop, and desktop screens.
 - **Scrollable Modals with Sticky Footer:** Fixed an issue where the "Save Item" button was cut off / hidden on smaller laptop and mobile screens. Modal headers and footers are now permanently pinned (`flex-shrink-0`), with the body smoothly scrollable (`overflow-y: auto`, `min-height: 0`).
 - **Dynamic Viewport Height (`100dvh`):** Modals now respect mobile browser address bars and virtual keyboards without overflowing.
